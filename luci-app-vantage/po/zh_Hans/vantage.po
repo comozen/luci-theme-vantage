@@ -1969,11 +1969,8 @@ msgstr ""
 "config/vantage，至多 512 条）"
 
 #: luci-app-vantage/root/usr/share/rpcd/acl.d/luci-app-vantage.json:46
-msgid ""
-"Vantage dashboard: override the uplink device shown and measured "
-"(luci.vantage set_uplink: one validated network device name in /etc/config/"
-"vantage only)"
-msgstr ""
+msgid "Vantage dashboard: override the uplink device (luci.vantage set_uplink)"
+msgstr "Vantage 仪表盘：覆盖上行链路设备（set_uplink）"
 
 #: luci-app-vantage/root/usr/share/rpcd/acl.d/luci-app-vantage.json:3
 msgid ""

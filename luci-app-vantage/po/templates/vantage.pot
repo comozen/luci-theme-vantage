@@ -1938,10 +1938,7 @@ msgid ""
 msgstr ""
 
 #: luci-app-vantage/root/usr/share/rpcd/acl.d/luci-app-vantage.json:46
-msgid ""
-"Vantage dashboard: override the uplink device shown and measured "
-"(luci.vantage set_uplink: one validated network device name in /etc/config/"
-"vantage only)"
+msgid "Vantage dashboard: override the uplink device (luci.vantage set_uplink)"
 msgstr ""
 
 #: luci-app-vantage/root/usr/share/rpcd/acl.d/luci-app-vantage.json:3

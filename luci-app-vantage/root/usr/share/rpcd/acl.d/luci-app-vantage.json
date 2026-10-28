@@ -43,7 +43,7 @@
 		}
 	},
 	"luci-app-vantage-uplink": {
-		"description": "Vantage dashboard: override the uplink device shown and measured (luci.vantage set_uplink: one validated network device name in /etc/config/vantage only)",
+		"description": "Vantage dashboard: override the uplink device (luci.vantage set_uplink)",
 		"read": {
 			"ubus": {
 				"uci": [ "get" ]
