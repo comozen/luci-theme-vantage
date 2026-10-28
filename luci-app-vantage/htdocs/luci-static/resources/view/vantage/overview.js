@@ -14,9 +14,10 @@
 'require vantage.wires as wires';
 
 /* Vantage dashboard (luci-app-vantage): a live, read-only overview of the
-   device, its uplink, radios, SSIDs and stations. The only write is the
-   station alias (uci vantage, own ACL). All DOM is built with E() and
-   text nodes; no string is ever parsed as markup. */
+   device, its uplink, radios, SSIDs and stations. The only writes are the
+   station alias and the uplink override (uci vantage, own ACL groups). All
+   DOM is built with E() and text nodes; no string is ever parsed as
+   markup. */
 
 var POLL_S = 5;
 var WINDOW_MS = 5 * 60 * 1000;        /* throughput history shown */
@@ -33,7 +34,8 @@ var callRead = rpc.declare({ object: 'file', method: 'read', params: [ 'path' ],
 var callIfDump = rpc.declare({ object: 'network.interface', method: 'dump', expect: { 'interface': [] } });
 var callDevs = rpc.declare({ object: 'network.device', method: 'status', expect: { '': {} } });
 /* luci.vantage is the app's own rpcd ucode plugin: network.wireless status
-   without keys or RADIUS secrets, and the validated alias write */
+   without keys or RADIUS secrets, and the validated alias and uplink
+   writes */
 var callWifi = rpc.declare({ object: 'luci.vantage', method: 'wireless', expect: { '': {} } });
 var callHints = rpc.declare({ object: 'luci-rpc', method: 'getHostHints', expect: { '': {} } });
 var callIwInfo = rpc.declare({ object: 'iwinfo', method: 'info', params: [ 'device' ], expect: { '': {} } });
@@ -42,6 +44,7 @@ var callRrdns = rpc.declare({ object: 'network.rrdns', method: 'lookup', params:
 var callMdns = rpc.declare({ object: 'umdns', method: 'hosts' });
 var callUciGet = rpc.declare({ object: 'uci', method: 'get', params: [ 'config' ], expect: { values: {} } });
 var callSetAlias = rpc.declare({ object: 'luci.vantage', method: 'set_alias', params: [ 'mac', 'name', 'icon' ] });
+var callSetUplink = rpc.declare({ object: 'luci.vantage', method: 'set_uplink', params: [ 'device' ] });
 var callAccess = rpc.declare({ object: 'session', method: 'access', params: [ 'scope', 'object', 'function' ], expect: { access: false } });
 
 var hostapdCalls = {};
@@ -456,18 +459,26 @@ return view.extend({
 			this.fetch(),
 			/* reverse DNS is an optional grant: without it, skip it quietly */
 			L.resolveDefault(callAccess('access-group', 'luci-app-vantage-rdns', 'read'), false),
-			L.resolveDefault(ui.menu.load(), null)
+			L.resolveDefault(ui.menu.load(), null),
+			/* the uplink override is an optional grant like the names */
+			L.resolveDefault(callAccess('access-group', 'luci-app-vantage-uplink', 'write'), false)
 		]).then(function(r) {
 			menuTree = r[7] || null;
-			return { board: r[1] || {}, canWrite: r[2] === true, mdns: r[4], raw: r[5], canRdns: r[6] === true };
+			return { board: r[1] || {}, canWrite: r[2] === true, mdns: r[4], raw: r[5], canRdns: r[6] === true, canUplink: r[8] === true };
 		});
 	},
 
+	/* /etc/config/vantage: the client sections (station aliases) and the
+	   main section's uplink override, one validated device name */
 	loadAliases: function() {
 		var self = this;
 		return L.resolveDefault(callUciGet('vantage'), {}).then(function(values) {
 			var list = (values && typeof values === 'object') ? Object.keys(values).map(function(k) { return values[k]; }) : [];
 			self.aliases = names.aliasMap(list.slice(0, names.ALIAS_MAX + 1));
+			/* only the section set_uplink writes counts, and only a device
+			   name: anything else in the file is left alone */
+			var main = list.filter(function(s) { return s && s['.type'] === 'vantage' && s['.name'] === 'main'; })[0];
+			self.uplinkOverride = (main && typeof main.uplink === 'string' && /^[A-Za-z0-9_.-]{1,64}$/.test(main.uplink)) ? main.uplink : null;
 			return self.aliases;
 		});
 	},
@@ -534,6 +545,8 @@ return view.extend({
 			});
 		this.board = data.board || {};
 		this.canWrite = data.canWrite;
+		this.canUplink = data.canUplink === true;
+		this.uplinkOverride = this.uplinkOverride || null;
 		this.st = {
 			clock: null, stat: null, cpu: null,
 			devPrev: null, staPrev: null, devRates: Object.create(null), staRates: Object.create(null), radioRates: Object.create(null), ssidRates: Object.create(null),
@@ -583,7 +596,7 @@ return view.extend({
 		var m = model.build({
 			board: this.board, info: raw.info, ifaces: raw.ifaces, devs: raw.devs, wifi: raw.wifi, iwinfo: raw.iwinfo,
 			assoc: raw.assoc, hapd: raw.hapd, hapdStatus: raw.hapdStatus, hints: raw.hints,
-			aliases: this.aliases, rdns: st.rdns, mdns: st.mdns,
+			aliases: this.aliases, rdns: st.rdns, mdns: st.mdns, uplinkOverride: this.uplinkOverride,
 			vendor: st.oui ? function(k) { return k ? st.oui.lookup(k) : null; } : null
 		});
 		this.markWired(m, raw);
@@ -737,7 +750,7 @@ return view.extend({
 		var m = model.build({
 			board: this.board, info: raw.info, ifaces: raw.ifaces, devs: raw.devs, wifi: raw.wifi, iwinfo: raw.iwinfo,
 			assoc: raw.assoc, hapd: raw.hapd, hapdStatus: raw.hapdStatus, hints: raw.hints,
-			aliases: this.aliases, rdns: st.rdns, mdns: st.mdns,
+			aliases: this.aliases, rdns: st.rdns, mdns: st.mdns, uplinkOverride: this.uplinkOverride,
 			vendor: st.oui ? function(k) { return k ? st.oui.lookup(k) : null; } : null
 		});
 		this.markWired(m, null);
@@ -2688,6 +2701,32 @@ return view.extend({
 		return false;
 	},
 
+	/* The uplink override, sent to luci.vantage set_uplink: one device name
+	   ('' clears), checked again there and written to /etc/config/vantage
+	   (main.uplink) at once. On success the model is rebuilt from the last
+	   replies, so the dashboard measures the chosen device right away.
+	   -> Promise<true | false | string (error text)> */
+	saveUplink: function(dev) {
+		var self = this;
+		dev = typeof dev === 'string' ? dev.trim() : '';
+		if (dev && !/^[A-Za-z0-9_.-]{1,64}$/.test(dev)) return Promise.resolve(_('Not a network device name'));
+		return Promise.resolve(callSetUplink(dev)).then(function(r) {
+			if (!(r && typeof r === 'object' && r.ok === true)) return self.uplinkError(r);
+			self.uplinkOverride = dev || null;
+			self.rerender();
+			return true;
+		}, function() { return false; });
+	},
+
+	/* set_uplink refusal -> message; false for anything else */
+	uplinkError: function(r) {
+		switch (r && typeof r === 'object' ? r.error : null) {
+		case 'invalid-device': return _('Not a network device name');
+		case 'failed': return _('The device could not write /etc/config/vantage.');
+		}
+		return false;
+	},
+
 	drawerRadio: function(id) {
 		var self = this, r = this.m.radios.filter(function(x) { return x.id === id; })[0];
 		if (!r) return { title: [ E('span', { 'class': 'vt-drawer-name' }, [ _('Unknown radio') ]) ], body: [ E('p', { 'class': 'vt-empty-inline' }, [ _('This radio is not reported any more.') ]) ] };
@@ -2724,9 +2763,41 @@ return view.extend({
 	},
 
 	drawerUplink: function() {
-		var up = this.m.uplink, r = this.st.uplinkRate;
+		var self = this, up = this.m.uplink, r = this.st.uplinkRate;
 		if (!up) return { title: [ E('span', { 'class': 'vt-drawer-name' }, [ _('Uplink', 'vantage') ]) ], body: [ E('p', { 'class': 'vt-empty-inline' }, [ _('No interface with a route is up.') ]) ] };
 		var s = up.stats || {};
+		/* with the uplink group: choose the device to measure, or leave it
+		   Automatic (the choice lands in /etc/config/vantage main.uplink) */
+		var pick = '';
+		if (this.canUplink) {
+			var wl = [];
+			this.m.radios.forEach(function(rr) { (rr.ifnames || []).forEach(function(n) { if (wl.indexOf(n) < 0) wl.push(n); }); });
+			var choices = model.uplinkChoices(up, this.lastRaw ? this.lastRaw.devs : null, wl);
+			var err = E('p', { 'class': 'vt-form-err', 'role': 'alert', 'hidden': 'hidden' });
+			var sel = E('select', { 'class': 'vt-select', 'id': 'vt-uplink-dev', 'aria-label': _('Uplink device'),
+				'change': function(ev) {
+					err.hidden = true;
+					self.saveUplink(ev.target.value).then(function(ok) {
+						/* a refusal or a lost call: the stored choice did not
+						   change, so show it again and say what happened */
+						if (ok === true) return;
+						sel.value = up.override || '';
+						txt(err, typeof ok === 'string' ? ok : _('Could not save the device choice (no permission or the device refused it).'));
+						err.hidden = false;
+					});
+				},
+				'focus': function() { self.ui.editing = true; },
+				'blur': function() { self.ui.editing = false; } },
+				[ E('option', { 'value': '' }, [ _('Automatic') ]) ].concat(choices.map(function(c) {
+					return E('option', { 'value': c.name }, [ c.name + (c.speed ? ' · ' + model.speedLabel(c.speed) : c.carrier === false ? ' · ' + _('No link') : '') ]);
+				})));
+			sel.value = up.override || '';
+			pick = this.section(_('Measured device'), [
+				E('div', { 'class': 'vt-edit-field' }, [ E('label', { 'for': 'vt-uplink-dev' }, [ _('Uplink device') ]), sel ]),
+				err,
+				E('p', { 'class': 'vt-hint' }, [ up.override ? _('Measuring %s, chosen in /etc/config/vantage.').format(up.override) : _('The dashboard picks the device itself; choose one to override that.') ])
+			]);
+		}
 		return {
 			title: [ E('span', { 'class': 'vt-drawer-ico' }, [ icon('globe') ]), E('div', { 'class': 'vt-drawer-titles' }, [
 				E('div', { 'class': 'vt-drawer-name' }, [ _('Uplink · %s').format(up.iface) ]),
@@ -2739,6 +2810,7 @@ return view.extend({
 					E('div', { 'class': 'vt-dcard' }, [ E('div', { 'class': 'vt-dcard-label' }, [ _('To network') ]), E('div', { 'class': 'vt-dcard-value' }, [ r ? fmt.bits(r.tx) : fmt.DASH ]), E('div', { 'class': 'vt-dcard-sub' }, [ _('sent on %s').format(up.dev) ]) ])
 				]),
 				E('div', { 'class': 'vt-dspark' }, [ sparkline(this.st.hist.net.uplink || [], [ 1, 2 ], 0, 'vt-spark-up', { min: 1000, scale: bitsLabel }) ]),
+				pick,
 				this.section(_('Link', 'vantage'), [ E('dl', { 'class': 'vt-kvs' }, [
 					kv(_('Carrier'), up.carrier === false ? _('No link') : _('Up', 'vantage')),
 					kv(_('Speed', 'vantage'), model.speedLabel(up.speed)),

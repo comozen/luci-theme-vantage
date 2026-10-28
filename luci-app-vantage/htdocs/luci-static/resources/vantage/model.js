@@ -176,9 +176,13 @@ return baseclass.extend({
 	   physical device its counters live on. Prefer interfaces with a default
 	   route, keeping wan/wan6/*wan* priority within that set. Fall back to
 	   WAN names, then the first up interface. A bridge is followed to its
-	   wired member (wireless members skipped; netifd 'ethernet' preferred); DSA with
-	   hardware offload uses the conduit's counters. */
-	resolveUplink: function(ifaces, devs, wirelessNames) {
+	   wired member (wireless members skipped; netifd 'ethernet' preferred,
+	   then a member with carrier: a driver without devtype still reports
+	   link); DSA with hardware offload uses the conduit's counters.
+	   `override` is the user's choice of device (uci vantage main.uplink):
+	   an interface running on that device becomes the pick; otherwise the
+	   default pick stays and only the measured device changes. */
+	resolveUplink: function(ifaces, devs, wirelessNames, override) {
 		var self = this;
 		ifaces = arr(ifaces);
 		devs = obj(devs);
@@ -201,18 +205,33 @@ return baseclass.extend({
 		var pick = preferredWan(routed) || routed[0] || preferredWan(up) || up[0];
 		if (!pick) return null;
 
+		/* the override wins over every default when an interface runs on it */
+		if (typeof override === 'string' && override) {
+			var o = up.filter(function(i) { return i.l3_device === override || i.device === override; })[0];
+			if (o) pick = o;
+		}
+
 		var l3 = pick.l3_device || pick.device, dev = l3, d = devs[dev];
 		if (d && (d.type === 'bridge' || d.devtype === 'bridge') && Array.isArray(d['bridge-members'])) {
 			var members = d['bridge-members'];
 			var wired = members.filter(function(m) { return !self.isWireless(m, devs[m], wirelessNames); });
 			var eth = wired.filter(function(m) { return devs[m] && devs[m].devtype === 'ethernet'; });
-			var next = eth[0] || wired[0] || members[0];
+			var link = wired.filter(function(m) { return devs[m] && devs[m].carrier === true; });
+			var next = eth.filter(function(m) { return devs[m] && devs[m].carrier === true; })[0] ||
+				link[0] || eth[0] || wired[0] || members[0];
 			if (next) { dev = next; d = devs[dev] || null; }
 		}
 
 		var statsDev = dev;
 		if (d && d.devtype === 'dsa' && d['hw-tc-offload'] && d.conduit && devs[d.conduit])
 			statsDev = d.conduit;
+
+		/* an override that named no interface still moves the measurement */
+		if (typeof override === 'string' && override && dev !== override) {
+			dev = override;
+			d = devs[dev] || null;
+			statsDev = dev;
+		}
 
 		var route = defRoute(pick), via = route && route.nexthop;
 		return {
@@ -226,6 +245,7 @@ return baseclass.extend({
 			up: !!pick.up,
 			carrier: d ? d.carrier !== false : null,
 			speed: d ? this.parseSpeed(d.speed) : null,
+			override: (typeof override === 'string' && override && dev === override) ? override : null,
 			ipv4: arr(pick['ipv4-address']).map(function(a) { return a && a.address ? a.address + '/' + a.mask : null; }).filter(Boolean),
 			ipv6: arr(pick['ipv6-address']).map(function(a) { return a && a.address ? a.address + '/' + a.mask : null; }).filter(Boolean),
 			gateway: via && via !== '0.0.0.0' && via !== '::' ? via : null,
@@ -234,6 +254,30 @@ return baseclass.extend({
 			dns: arr(pick['dns-server']).filter(function(s) { return typeof s === 'string'; }),
 			stats: d && d.statistics ? d.statistics : null
 		};
+	},
+
+	/* Devices the GUI may offer for the uplink override: the wired members
+	   of a bridged uplink, else the uplink's device alone. The current
+	   override stays listed even when it is not among them any more, so it
+	   can be seen and cleared. -> [ { name, carrier, speed } ] */
+	uplinkChoices: function(uplink, devs, wirelessNames) {
+		var self = this;
+		devs = obj(devs);
+		if (!uplink || !uplink.dev) return [];
+		var list = [];
+		var d = devs[uplink.l3dev];
+		if (d && (d.type === 'bridge' || d.devtype === 'bridge') && Array.isArray(d['bridge-members']))
+			list = d['bridge-members'].filter(function(m) {
+				return typeof m === 'string' && !self.isWireless(m, devs[m], wirelessNames);
+			});
+		if (list.indexOf(uplink.dev) < 0) list.unshift(uplink.dev);
+		if (uplink.override && list.indexOf(uplink.override) < 0) list.push(uplink.override);
+		return list.filter(function(n, i) {
+			return typeof n === 'string' && n && list.indexOf(n) === i;
+		}).map(function(n) {
+			var dn = devs[n];
+			return { name: n, carrier: dn ? dn.carrier !== false : null, speed: dn ? self.parseSpeed(dn.speed) : null };
+		});
 	},
 
 	/* The device's other networks (lan, guest, a VPN, ...): every
@@ -403,7 +447,7 @@ return baseclass.extend({
 			radios.push(radio);
 		});
 
-		var uplink = this.resolveUplink(raw.ifaces, devs, wlNames);
+		var uplink = this.resolveUplink(raw.ifaces, devs, wlNames, typeof raw.uplinkOverride === 'string' ? raw.uplinkOverride : null);
 		var subnets = uplink ? uplink.ipv4 : [];
 
 		function hintOf(mac) { return obj(hints[mac.toUpperCase()] || hints[mac]); }

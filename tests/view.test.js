@@ -125,6 +125,87 @@ test('saving a name: set_alias with the normalised MAC, names reloaded after eve
 	delete REPLIES['luci.vantage set_alias'];
 });
 
+test('stored override: only main.uplink of /etc/config/vantage counts', async () => {
+	const self = Object.create(view);
+	const cases = [
+		[ { main: { '.type': 'vantage', '.name': 'main', uplink: 'eth1' } }, 'eth1' ],
+		[ { main: { '.type': 'vantage', '.name': 'main' } }, null, 'no option' ],
+		[ { cfg000001: { '.type': 'client', '.name': 'cfg000001', mac: '00:00:5e:00:53:21', name: 'TV' },
+		    main: { '.type': 'vantage', '.name': 'main', uplink: 'eth3' } }, 'eth3', 'names and the override in one file' ],
+		[ { other: { '.type': 'vantage', '.name': 'other', uplink: 'eth1' } }, null, 'not the section set_uplink writes' ],
+		[ { main: { '.type': 'vantage', '.name': 'main', uplink: 'eth0; rm -rf /' } }, null, 'not a device name' ],
+		[ { main: { '.type': 'vantage', '.name': 'main', uplink: 'a'.repeat(65) } }, null, 'too long' ],
+		[ { main: { '.type': 'vantage', '.name': 'main', uplink: [ 'eth1' ] } }, null, 'uci list, not a device' ],
+		[ { main: { '.type': 'network', '.name': 'main', uplink: 'eth1' } }, null, 'not a vantage section' ],
+		[ { main: null }, null ], [ null, null ], [ 'junk', null ]
+	];
+	/* L is a LuCI global the view takes as given; only resolveDefault is
+	   needed to read the config here */
+	const savedL = global.L;
+	global.L = { resolveDefault: (p, def) => Promise.resolve(p).then(v => (v === null || v === undefined) ? def : v) };
+	try {
+		for (const [ values, want, note ] of cases) {
+			REPLIES['uci get'] = () => Promise.resolve(values);
+			await self.loadAliases();
+			assert.equal(self.uplinkOverride, want, note || JSON.stringify(values));
+		}
+	} finally {
+		global.L = savedL;
+		delete REPLIES['uci get'];
+	}
+});
+
+test('saving the device: set_uplink with the trimmed name, the model follows', async () => {
+	const calls = [];
+	const self = Object.create(view);
+	self.uplinkOverride = null;
+	let rerenders = 0;
+	self.rerender = () => { rerenders++; };
+	const outcomes = [
+		[ 'eth1', () => Promise.resolve({ ok: true, op: 'set', device: 'eth1' }), true, 'eth1' ],
+		[ '  eth2 ', () => Promise.resolve({ ok: true, op: 'set', device: 'eth2' }), true, 'eth2' ],
+		[ '', () => Promise.resolve({ ok: true, op: 'clear', device: '' }), true, null, 'Automatic clears it' ],
+		[ 'eth3', () => Promise.resolve({ ok: false, error: 'invalid-device' }), 'Not a network device name', null ],
+		[ 'eth3', () => Promise.resolve({ ok: false, error: 'failed' }), 'The device could not write /etc/config/vantage.', null ],
+		[ 'eth3', () => Promise.resolve(6), false, null ],
+		[ 'eth3', () => Promise.reject(new Error('RPCError')), false, null ],
+		[ 'eth3', () => Promise.resolve(null), false, null, 'no answer at all' ]
+	];
+	for (const [ dev, reply, want, still ] of outcomes) {
+		REPLIES['luci.vantage set_uplink'] = (...a) => { calls.push(a); return reply(); };
+		const before = rerenders;
+		assert.equal(await self.saveUplink(dev), want, JSON.stringify(dev));
+		assert.equal(self.uplinkOverride, still, 'the override only changes on success');
+		assert.equal(rerenders, before + (want === true ? 1 : 0), 'repaint only on success');
+	}
+	assert.deepEqual(calls, [ [ 'eth1' ], [ 'eth2' ], [ '' ], [ 'eth3' ], [ 'eth3' ], [ 'eth3' ], [ 'eth3' ], [ 'eth3' ] ]);
+	/* refused before any call: nothing leaves the browser */
+	const n = calls.length;
+	for (const bad of [ 'eth0; rm -rf /', '../etc/passwd', 'eth 1', 'a'.repeat(65), 'a\u202eb' ])
+		assert.equal(typeof await self.saveUplink(bad), 'string', bad);
+	assert.equal(calls.length, n);
+	delete REPLIES['luci.vantage set_uplink'];
+});
+
+test('the device picker: built only for the group that may write it', () => {
+	const src = fs.readFileSync(path.join(RES, 'view/vantage/overview.js'), 'utf8');
+	const block = /if \(this\.canUplink\) \{([\s\S]*?)\n\t\t\}/.exec(src);
+	assert.ok(block, 'the picker is inside the canUplink branch');
+	assert.match(block[1], /model\.uplinkChoices\(/, 'the choices come from the model');
+	assert.match(block[1], /'change': function\(ev\) \{[\s\S]*?self\.saveUplink\(ev\.target\.value\)\.then\(function\(ok\) \{/);
+	assert.match(block[1], /sel\.value = up\.override \|\| '';\s*\n\s*txt\(err,/, 'a refused change is put back and said out loud');
+	assert.match(block[1], /E\('option', \{ 'value': '' \}, \[ _\('Automatic'\) \]\)/, 'Automatic is an option');
+	assert.match(block[1], /sel\.value = up\.override \|\| '';/, 'it shows what is stored');
+	assert.doesNotMatch(block[1], /innerHTML|outerHTML|insertAdjacentHTML/);
+	/* the grant is probed with the page, and reaches the state */
+	assert.match(src, /callAccess\('access-group', 'luci-app-vantage-uplink', 'write'\)/);
+	assert.match(src, /canUplink: r\[\d\] === true/);
+	assert.match(src, /this\.canUplink = data\.canUplink === true;/);
+	/* without the group nothing is built, and nothing is ever sent */
+	assert.equal((src.match(/if \(this\.canUplink\)/g) || []).length, 1);
+	assert.match(src, /var pick = '';/);
+});
+
 test('wired-only: decided by an answered empty wireless status, never by a failed call', () => {
 	const self = Object.create(view);
 	self.st = { wireless: null };

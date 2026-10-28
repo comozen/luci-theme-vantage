@@ -7,11 +7,12 @@
  *
  * The ACL is least privilege and in step with the shipped JavaScript:
  *
- * - exactly three groups: `luci-app-vantage` (read-only),
+ * - exactly four groups: `luci-app-vantage` (read-only),
  *   `luci-app-vantage-rdns` (optional: network.rrdns lookup, which lets
- *   the holder point the device's DNS queries at any server and port) and
+ *   the holder point the device's DNS queries at any server and port),
  *   `luci-app-vantage-names` (station aliases through the app's own rpcd
- *   plugin method luci.vantage set_alias);
+ *   plugin method luci.vantage set_alias) and `luci-app-vantage-uplink`
+ *   (the dashboard's uplink override through luci.vantage set_uplink);
  * - the read group grants exactly the allowlisted ubus methods below, no
  *   write section, no `*` object or method, no method glob; the one object
  *   glob is `hostapd.*`, because hostapd's ubus objects are named per
@@ -22,7 +23,8 @@
  *   remove, list or stat, no cgi-io;
  * - uci is readable for `vantage` only and writable by nobody: no uci
  *   add/set/delete/commit/... method and no `uci` write list in any group;
- *   the only grant beyond reads is luci.vantage set_alias;
+ *   the only grants beyond reads are luci.vantage set_alias and
+ *   luci.vantage set_uplink;
  * - the plugin (root/usr/share/rpcd/ucode/luci.vantage) registers exactly
  *   the luci.vantage methods the ACL grants, opens config `vantage` only,
  *   and imports nothing but uci and ubus (no fs, no process execution);
@@ -42,8 +44,8 @@
  *   app file requires a LuCI module that loads other configs on its own
  *   (`network` loads `wireless`, `firewall` and `tools.*` load more), or
  *   loads modules by a computed name;
- * - the view probes exactly the names group (write) and the rdns group
- *   (read);
+ * - the view probes exactly the names group (write), the rdns group
+ *   (read) and the uplink group (write);
  * - the dashboard's menu entry is gated by the read group; the firewall
  *   overview's (Network -> Firewall -> Overview) by luci-app-firewall,
  *   LuCI's own group for the firewall pages, which already lets its holder
@@ -64,6 +66,7 @@ const PLUGIN_FILE = path.join(PKG, 'root/usr/share/rpcd/ucode/luci.vantage');
 const READ_GROUP = 'luci-app-vantage';
 const RDNS_GROUP = 'luci-app-vantage-rdns';
 const WRITE_GROUP = 'luci-app-vantage-names';
+const UPLINK_GROUP = 'luci-app-vantage-uplink';
 const PLUGIN_OBJECT = 'luci.vantage';
 const FIREWALL_VIEW = 'view/vantage/firewall.js';
 
@@ -83,6 +86,7 @@ const READ_UBUS = {
 const READ_FILES = { '/proc/stat': [ 'read' ] };
 const RDNS_UBUS = { 'network.rrdns': [ 'lookup' ] };
 const WRITE_UBUS = { 'luci.vantage': [ 'set_alias' ] };
+const UPLINK_UBUS = { 'luci.vantage': [ 'set_uplink' ] };
 const OBJECT_GLOBS = new Set([ 'hostapd.*' ]);
 const UCI_WRITE = /^(add|set|delete|commit|rename|order|apply|confirm|rollback|revert|changes)$/;
 /* calls the platform grants to every session (rpcd acl.d/unauthenticated.json) */
@@ -150,8 +154,8 @@ function analyse() {
 
 const { declared, vars, problems } = analyse();
 
-test('exactly the three groups', () => {
-	assert.deepEqual(Object.keys(acl).sort(), [ READ_GROUP, RDNS_GROUP, WRITE_GROUP ].sort());
+test('exactly the four groups', () => {
+	assert.deepEqual(Object.keys(acl).sort(), [ READ_GROUP, RDNS_GROUP, WRITE_GROUP, UPLINK_GROUP ].sort());
 });
 
 test('read group: exactly the allowlisted read methods, nothing written', () => {
@@ -190,7 +194,14 @@ test('names group: luci.vantage set_alias, uci read on vantage, no uci write', (
 	assert.deepEqual(g.write, { ubus: WRITE_UBUS });
 });
 
-test('no uci write grant anywhere; the only non-read grant is the plugin\'s set_alias', () => {
+test('uplink group: luci.vantage set_uplink, uci read on vantage, no uci write', () => {
+	const g = acl[UPLINK_GROUP];
+	assert.deepEqual(Object.keys(g).sort(), [ 'description', 'read', 'write' ]);
+	assert.deepEqual(g.read, { ubus: { uci: [ 'get' ] }, uci: [ 'vantage' ] });
+	assert.deepEqual(g.write, { ubus: UPLINK_UBUS });
+});
+
+test('no uci write grant anywhere; the only non-read grants are the plugin\'s set_alias and set_uplink', () => {
 	const extra = [];
 	for (const [ name, g ] of Object.entries(acl)) {
 		for (const kind of [ 'read', 'write' ]) {
@@ -204,7 +215,7 @@ test('no uci write grant anywhere; the only non-read grant is the plugin\'s set_
 			if (kind === 'write') assert.equal(sec.file, undefined, `${name}: file write list`);
 		}
 	}
-	assert.deepEqual(extra, [ 'luci.vantage set_alias' ]);
+	assert.deepEqual(extra.sort(), [ 'luci.vantage set_alias', 'luci.vantage set_uplink' ]);
 });
 
 test('the plugin registers exactly the granted luci.vantage methods and touches config vantage only', () => {
@@ -217,16 +228,19 @@ test('the plugin registers exactly the granted luci.vantage methods and touches 
 	for (const g of Object.values(acl)) for (const kind of [ 'read', 'write' ])
 		for (const m of ((g[kind] || {}).ubus || {})[PLUGIN_OBJECT] || []) granted.add(m);
 	assert.deepEqual(methods, [ ...granted ].sort());
-	assert.deepEqual(methods, [ 'set_alias', 'wireless' ]);
+	assert.deepEqual(methods, [ 'set_alias', 'set_uplink', 'wireless' ]);
 	assert.ok(pairs(acl[READ_GROUP].read.ubus).has(PLUGIN_OBJECT + ' wireless'));
 	assert.ok(pairs(acl[WRITE_GROUP].write.ubus).has(PLUGIN_OBJECT + ' set_alias'));
+	assert.ok(pairs(acl[UPLINK_GROUP].write.ubus).has(PLUGIN_OBJECT + ' set_uplink'));
 
 	/* imports: uci and ubus, nothing that reaches files or processes */
 	const imports = [ ...plugin.matchAll(/^import .* from '([^']+)';$/gm) ].map(m => m[1]).sort();
 	assert.deepEqual(imports, [ 'ubus', 'uci' ]);
 	assert.doesNotMatch(plugin, /\b(system|popen|exec|require|loadfile|loadstring|include|render|writefile|unlink)\s*\(/);
 
-	/* uci: every cursor call names CONFIG, and CONFIG is 'vantage' */
+	/* uci: every cursor call names CONFIG first (set_uplink's section
+	   create carries the section name and type after it), and CONFIG is
+	   'vantage' */
 	assert.match(plugin, /^const CONFIG = 'vantage';$/m);
 	const calls = [ ...plugin.matchAll(/\buci\.(\w+)\(([^,)]*)/g) ];
 	assert.ok(calls.length >= 5, 'found the uci calls');
@@ -272,7 +286,8 @@ test('the JavaScript is analysable', () => {
 
 test('every declared call is granted and every grant is used', () => {
 	const granted = new Set([ ...pairs(acl[READ_GROUP].read.ubus), ...pairs(acl[RDNS_GROUP].read.ubus),
-		...pairs(acl[WRITE_GROUP].read.ubus), ...pairs(acl[WRITE_GROUP].write.ubus) ]);
+		...pairs(acl[WRITE_GROUP].read.ubus), ...pairs(acl[WRITE_GROUP].write.ubus),
+		...pairs(acl[UPLINK_GROUP].read.ubus), ...pairs(acl[UPLINK_GROUP].write.ubus) ]);
 	const need = [ ...declared.keys() ].filter(k => !PLATFORM.has(k));
 	assert.deepEqual(need.filter(k => !granted.has(k)).sort(), [], 'declared but not granted');
 	assert.deepEqual([ ...granted ].filter(k => !declared.has(k)).sort(), [], 'granted but never declared');
@@ -454,10 +469,10 @@ test('negative controls: a declare spelled to dodge the count is not analysable'
 	}
 });
 
-test('the view probes the names and rdns groups; the menu is gated by the read group', () => {
+test('the view probes the names, rdns and uplink groups; the menu is gated by the read group', () => {
 	const view = sources.find(s => s.file.endsWith('view/vantage/overview.js')).text;
 	const probes = [ ...view.matchAll(/callAccess\('access-group', '([^']+)', '(\w+)'\)/g) ].map(m => m[1] + ' ' + m[2]);
-	assert.deepEqual(probes, [ WRITE_GROUP + ' write', RDNS_GROUP + ' read' ]);
+	assert.deepEqual(probes, [ WRITE_GROUP + ' write', RDNS_GROUP + ' read', UPLINK_GROUP + ' write' ]);
 	assert.deepEqual(Object.keys(menu), [ 'admin/dashboard', 'admin/network/firewall/overview' ]);
 	assert.deepEqual(menu['admin/dashboard'].depends.acl, [ READ_GROUP ]);
 });

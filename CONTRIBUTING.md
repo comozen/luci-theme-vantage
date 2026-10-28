@@ -166,10 +166,11 @@ your catalogues; there is nothing else to set up.
   entry and an allowlist entry in `security-tests/test_acl_policy.js`, with
   the reason in the pull request. The app stays read-only apart from its
   own `/etc/config/vantage`, which it writes only through its rpcd plugin
-  (`luci.vantage set_alias`, validated on the device); no ACL group grants
-  uci writes, and nothing reads Wi-Fi keys. Changes to the plugin's name
-  rules go into `names.js` and `dev/replay/vantage-plugin.js` as well;
-  `tests/plugin.test.js` compares them (the real plugin runs when
+  (`luci.vantage set_alias` for station names, `set_uplink` for the device
+  to measure, each in its own group, both validated on the device); no ACL
+  group grants uci writes, and nothing reads Wi-Fi keys. Changes to the
+  plugin's rules go into `names.js` and `dev/replay/vantage-plugin.js` as
+  well; `tests/plugin.test.js` compares them (the real plugin runs when
   `UCODE=/path/to/ucode` points at a host ucode binary).
 - **Theme and app stay independent.** The app uses only the theme's
   `--v-*` custom properties (with fallbacks) and its own `vt-*` classes.

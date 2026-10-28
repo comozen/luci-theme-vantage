@@ -10,6 +10,11 @@
 //              with name ''. Validated here, whatever the browser did, and
 //              written to /etc/config/vantage only. Write group
 //              luci-app-vantage-names.
+//   set_uplink { device }: override the network device the dashboard
+//              measures the uplink on, or clear the override with device
+//              ''. One validated device name in /etc/config/vantage
+//              (main.uplink) only; no network configuration is touched.
+//              Write group luci-app-vantage-uplink.
 //
 // Keep the validation in step with names.js (validateAlias, normMac,
 // ICONS) and with dev/replay/vantage-plugin.js; tests/plugin.test.js runs
@@ -306,6 +311,44 @@ function set_alias(args) {
 	return { ok: true, op, mac };
 }
 
+/* --------------------------------------------------------- set_uplink */
+
+// network device names as the kernel and netifd use them
+const DEVICE_RE = /^[A-Za-z0-9_.-]{1,64}$/;
+
+// The dashboard's uplink override: one device name in main.uplink, or no
+// option (the dashboard picks the device itself). The named section is
+// created if the config lost it; uci.set with the section type creates it.
+function set_uplink(args) {
+	let dev = (type(args.device) == 'string') ? trim(args.device) : '';
+
+	if (dev != '' && !match(dev, DEVICE_RE))
+		return { ok: false, error: 'invalid-device' };
+
+	let uci = cursor(), have_main = false;
+
+	uci.load(CONFIG);
+	uci.foreach(CONFIG, 'vantage', (s) => {
+		if (s['.name'] == 'main')
+			have_main = true;
+	});
+
+	if (!have_main)
+		uci.set(CONFIG, 'main', 'vantage');
+
+	if (dev == '')
+		uci.delete(CONFIG, 'main', 'uplink');
+	else
+		uci.set(CONFIG, 'main', 'uplink', dev);
+
+	if (!uci.commit(CONFIG)) {
+		uci.revert(CONFIG);
+		return { ok: false, error: 'failed' };
+	}
+
+	return { ok: true, op: dev == '' ? 'clear' : 'set', device: dev };
+}
+
 /* ------------------------------------------------------------ methods */
 
 const methods = {
@@ -329,6 +372,13 @@ const methods = {
 		args: { mac: 'mac', name: 'name', icon: 'icon' },
 		call: function(request) {
 			return set_alias(request.args);
+		}
+	},
+
+	set_uplink: {
+		args: { device: 'device' },
+		call: function(request) {
+			return set_uplink(request.args);
 		}
 	}
 };

@@ -53,14 +53,16 @@ Two OpenWrt 25.12 LuCI packages plus offline tooling. No npm, no
    enforces this.
 6. **The ACL stays minimal and matches the code.** Every `rpc.declare` in
    the app must be granted in `luci-app-vantage.json`, and every grant must
-   be used. The read group is read-only and never reads Wi-Fi keys
-   (wireless data comes from the plugin's `wireless` method; LuCI's own
-   groups, such as `luci-base-network-status`, can); reverse DNS
-   sits in its own optional group (`luci-app-vantage-rdns`); the names
-   group (`luci-app-vantage-names`) grants the plugin's `set_alias`, which
-   validates and writes `/etc/config/vantage` itself, and reading that
-   config. No group
-   grants uci writes; no `file.exec`. The plugin's name rules must match
+   be used. There are four groups. The read group is read-only and never
+   reads Wi-Fi keys (wireless data comes from the plugin's `wireless`
+   method; LuCI's own groups, such as `luci-base-network-status`, can);
+   reverse DNS sits in its own optional group (`luci-app-vantage-rdns`);
+   the names group (`luci-app-vantage-names`) grants the plugin's
+   `set_alias`, and the uplink group (`luci-app-vantage-uplink`) grants
+   `set_uplink` — each validates its input, writes
+   `/etc/config/vantage` itself, and reads that config. Naming stations
+   and changing what the dashboard measures stay separate grants. No group
+   grants uci writes; no `file.exec`. The plugin's rules must match
    `names.js` and `dev/replay/vantage-plugin.js` (`tests/plugin.test.js`).
    Adding a call means changing the view, the ACL JSON and the allowlist in
    `security-tests/test_acl_policy.js` together, and saying why in the

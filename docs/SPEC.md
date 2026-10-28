@@ -301,7 +301,7 @@ text around it so it looks the same size.
   changes size. Idle animations (the Live beat, the flow on busy wires)
   use transform and opacity only, so the compositor runs them; with
   reduced motion they stop and busy wires show a static dotted line.
-- ACL: three groups. `luci-app-vantage` (read): `system info/board`,
+- ACL: four groups. `luci-app-vantage` (read): `system info/board`,
   `network.interface dump`, `network.device status`, `iwinfo
   info/assoclist`, `hostapd.* get_status/get_clients`, `luci-rpc
   getHostHints`, `luci.vantage wireless`, `umdns hosts`, `file read` of
@@ -309,8 +309,11 @@ text around it so it looks the same size.
   `luci-app-vantage-rdns` (read, optional): `network.rrdns lookup`, kept
   apart because its caller chooses the DNS server and port; the view
   checks the grant and skips reverse DNS without it.
-  `luci-app-vantage-names` (write): `luci.vantage set_alias` only; no
-  group grants uci writes. The firewall overview's menu entry depends on
+  `luci-app-vantage-names` (write): `luci.vantage set_alias` only.
+  `luci-app-vantage-uplink` (write): `luci.vantage set_uplink` only, so
+  naming stations and changing what the dashboard measures are separate
+  grants; each reads `vantage` for what it shows. No group grants uci
+  writes. The firewall overview's menu entry depends on
   LuCI's `luci-app-firewall` group, whose holder already reads and
   changes `firewall`; it reads that config with `uci get` (and the
   interfaces with `network.interface dump`, which LuCI's
@@ -325,6 +328,12 @@ text around it so it looks the same size.
   48 code points without control, bidi or invisible characters, icon from
   the fixed list), keeps one section per MAC, refuses a new name past 512,
   and writes and commits config `vantage` only.
+  `set_uplink({device})` stores the one network device the dashboard
+  measures as its uplink in `vantage`'s `main.uplink` — a name the kernel
+  and netifd could use (`[A-Za-z0-9_.-]{1,64}`), or no option at all when
+  the device name is empty, which puts the choice back on the dashboard.
+  This is the escape hatch for a device whose driver reports no `devtype`
+  or no carrier, where the default bridge-follow can only guess.
 
 ## 5. Later
 
@@ -357,8 +366,9 @@ text around it so it looks the same size.
   The one object glob is `hostapd.*` (hostapd's ubus objects are named per
   interface), limited to `get_clients`/`get_status`. No group of the app
   grants a uci write or reads Wi-Fi keys (LuCI's own groups can, such as
-  `luci-base-network-status`); the only write is the plugin's `set_alias`,
-  whose validation `tests/plugin.test.js` checks against the view's.
+  `luci-base-network-status`); the only writes are the plugin's
+  `set_alias` and `set_uplink`, whose validation
+  `tests/plugin.test.js` checks against the view's.
 - No private addresses or MACs in committed files
   (`security-tests/check_private_addresses.js`, which also looks for the
   hostnames/SSIDs recorded in the mirror when it is present); fixtures are

@@ -38,6 +38,15 @@ test('view: aliases are checked by names.aliasOp and written only through luci.v
 	assert.match(view, /callSetAlias\(key, value, icon\)\)\.then\([\s\S]*?\}\)\.then\(function\(res\) \{\n\t\t\treturn self\.loadAliases\(\)/);
 });
 
+test('view: the uplink override is written only through luci.vantage set_uplink', () => {
+	assert.match(view, /rpc\.declare\(\{ object: 'luci\.vantage', method: 'set_uplink', params: \[ 'device' \] \}\)/);
+	const calls = [ ...view.matchAll(/callSetUplink\(([^)]*)\)/g) ].map(m => m[1]);
+	assert.deepEqual(calls, [ 'dev' ]);
+	/* one device name, checked before it is sent and again on the device */
+	assert.match(view, /dev && !\/\^\[A-Za-z0-9_.-\]\{1,64\}\$\/\.test\(dev\)/);
+	assert.doesNotMatch(view, /object: 'uci', method: '(add|set|delete|commit|rename|order|apply|revert)'/);
+});
+
 test('view: wireless data comes from luci.vantage wireless, reverse DNS only with its group', () => {
 	assert.match(view, /rpc\.declare\(\{ object: 'luci\.vantage', method: 'wireless'/);
 	assert.doesNotMatch(view, /getWirelessDevices/);

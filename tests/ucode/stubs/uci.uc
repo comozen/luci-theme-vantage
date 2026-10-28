@@ -33,6 +33,18 @@ function cursor() {
 		set: function(conf, sid, opt, val) {
 			let s = find(sid);
 
+			// no value: `set config.section=type`, libuci's named section
+			// create, which is how the plugin restores a lost main
+			if (val == null) {
+				if (s)
+					return (s['.type'] == opt) ? s : null;
+
+				s = { '.name': sid, '.type': opt, '.anonymous': false };
+				push(global.STUB.sections, s);
+
+				return s;
+			}
+
 			if (!s)
 				return null;
 

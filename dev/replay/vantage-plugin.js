@@ -8,6 +8,8 @@
                              reduced to the fields the dashboard reads
      luci.vantage set_alias  { mac, name, icon } -> uci vantage in the
                              store's overlay, committed at once
+     luci.vantage set_uplink { device } -> main.uplink in the same overlay
+                             (an empty device removes the option)
    tests/plugin.test.js checks this file, the real plugin (when a host
    ucode binary is available) and names.js against the same cases, so the
    three stay in step.
@@ -22,6 +24,8 @@ const NAME_MAX = 48;
 const NAME_MAX_UNITS = NAME_MAX * 8;
 const MAX_ALIASES = 512;
 const ICONS = [ 'phone', 'laptop', 'tablet', 'desktop', 'tv', 'speaker', 'printer', 'camera', 'console', 'watch', 'iot', 'router', 'device' ];
+/* network device names as the kernel and netifd use them */
+const DEVICE_RE = /^[A-Za-z0-9_.-]{1,64}$/;
 
 /* rpcd ubus status codes */
 const INVALID_ARGUMENT = 2;
@@ -30,7 +34,8 @@ const METHOD_NOT_FOUND = 3;
 /* argument policy of each method (rpcd rejects unknown names and wrong types) */
 const POLICY = {
 	wireless: {},
-	set_alias: { mac: 'string', name: 'string', icon: 'string' }
+	set_alias: { mac: 'string', name: 'string', icon: 'string' },
+	set_uplink: { device: 'string' }
 };
 
 function normMac(v) {
@@ -137,8 +142,8 @@ function reduceWireless(status) {
 
 /* The uci work of set_alias against a minimal cursor:
      { sections(): [ { '.name', '.type', ... } ], add(type) -> sid,
-       set(sid, opt, value), del(sid, opt?), commit() -> bool,
-       revert()? } */
+       named(type, name) -> sid, set(sid, opt, value), del(sid, opt?),
+       commit() -> bool, revert()? } */
 function setAlias(uci, args) {
 	const mac = normMac(args.mac);
 	if (!mac || isMulticast(mac)) return { ok: false, error: 'invalid-mac' };
@@ -180,6 +185,29 @@ function setAlias(uci, args) {
 	return { ok: true, op, mac };
 }
 
+/* The uci work of set_uplink against the same minimal cursor: one device
+   name in main.uplink, or the option gone (the dashboard picks the device
+   itself). `named` is libuci's `set config.section=type`, which restores
+   the named section the package ships when the config has lost it; like
+   the plugin, its answer is not consulted — the write below is what
+   decides. */
+function setUplink(uci, args) {
+	const dev = (typeof args.device === 'string') ? args.device.replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, '') : '';
+	if (dev !== '' && !DEVICE_RE.test(dev)) return { ok: false, error: 'invalid-device' };
+
+	const haveMain = uci.sections().some(s => s['.name'] === 'main' && s['.type'] === 'vantage');
+	if (!haveMain) uci.named('vantage', 'main');
+
+	if (dev === '') uci.del('main', 'uplink');
+	else uci.set('main', 'uplink', dev);
+
+	if (!uci.commit()) {
+		if (uci.revert) uci.revert();
+		return { ok: false, error: 'failed' };
+	}
+	return { ok: true, op: dev === '' ? 'clear' : 'set', device: dev };
+}
+
 /* rpcd's argument check: every argument must be in the policy with the
    declared type (absent ones are fine) */
 function argsOk(method, args) {
@@ -203,6 +231,7 @@ function storeCursor(store) {
 			return ok(r) ? Object.values(r.result[1].values || {}) : [];
 		},
 		add: type => { const r = u('add', { type }); return ok(r) ? r.result[1].section : null; },
+		named: (type, name) => { const r = u('add', { type, name }); return ok(r) ? r.result[1].section : null; },
 		set: (sid, opt, value) => u('set', { section: sid, values: { [opt]: value } }),
 		del: (sid, opt) => u('delete', opt == null ? { section: sid } : { section: sid, option: opt }),
 		commit: () => ok(u('commit', {}))
@@ -216,7 +245,8 @@ function call(store, method, args) {
 	if (!argsOk(method, args)) return { result: [ INVALID_ARGUMENT ] };
 	if (method === 'wireless') return { result: [ 0, reduceWireless(store.data('network.wireless', 'status', {})) ] };
 	if (store.uciSeed) store.uciSeed(CONFIG, { main: { '.anonymous': false, '.type': 'vantage', '.name': 'main' } });
-	return { result: [ 0, setAlias(storeCursor(store), args) ] };
+	const r = (method === 'set_uplink') ? setUplink(storeCursor(store), args) : setAlias(storeCursor(store), args);
+	return { result: [ 0, r ] };
 }
 
-module.exports = { OBJECT, POLICY, MAX_ALIASES, NAME_MAX, ICONS, normMac, validateName, reduceWireless, setAlias, argsOk, call };
+module.exports = { OBJECT, POLICY, MAX_ALIASES, NAME_MAX, ICONS, DEVICE_RE, normMac, validateName, reduceWireless, setAlias, setUplink, argsOk, call };

@@ -202,11 +202,13 @@ node security-tests/test_acl_policy.js
   ucode plugin (`luci.vantage wireless`), which leaves out Wi-Fi keys,
   SAE passwords and RADIUS secrets. Reverse DNS (`network.rrdns lookup`,
   which lets its holder aim the device's DNS queries at any server) is a
-  separate, optional group, `luci-app-vantage-rdns`. The one write, device
-  names, goes through the plugin's `set_alias`, which validates the name
-  and MAC on the device and writes only `/etc/config/vantage` (at most 512
-  names); it is in its own group, `luci-app-vantage-names`. No group grants
-  uci writes. The firewall overview reads the `firewall` config (and the
+  separate, optional group, `luci-app-vantage-rdns`. The two writes are
+  the plugin's own methods, each in a group of its own: device names
+  (`set_alias`, in `luci-app-vantage-names`) validate the name and MAC on
+  the device and keep to `/etc/config/vantage` (at most 512 names), and
+  the uplink device (`set_uplink`, in `luci-app-vantage-uplink`)
+  validates one network device name and writes only that option. No group
+  grants uci writes. The firewall overview reads the `firewall` config (and the
   interface status, to find the uplink) and is
   shown only to sessions that hold LuCI's own `luci-app-firewall` group,
   which already reads and changes that config; the app grants nothing for

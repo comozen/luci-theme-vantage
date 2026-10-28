@@ -173,6 +173,98 @@ test('resolveUplink: a tunnel\'s default route without a next hop is still a def
 	assert.equal(u.defaultRoute, true);
 });
 
+/* An access point whose driver reports no devtype for any netdev, the way
+   QWRT's does: only carrier says which port has a cable in it. */
+const AP_LAN = { interface: 'lan', up: true, l3_device: 'br-lan', device: 'br-lan', proto: 'static',
+	route: [ { target: '0.0.0.0', mask: 0, nexthop: '192.0.2.1' } ], 'ipv4-address': [ { address: '192.0.2.10', mask: 24 } ] };
+const AP_IFACES = [ AP_LAN ];
+const AP_DEVS = {
+	'br-lan': { type: 'bridge', 'bridge-members': [ 'ath0', 'ath1', 'ath2', 'eth0', 'eth1', 'eth2', 'eth3' ] },
+	'ath0': { up: true }, 'ath1': { up: true }, 'ath2': { up: true },
+	'eth0': { carrier: false, statistics: { rx_bytes: 10, tx_bytes: 1 } },
+	'eth1': { carrier: true, speed: '2500F', statistics: { rx_bytes: 900, tx_bytes: 800 } },
+	'eth2': { carrier: false },
+	'eth3': { carrier: true, speed: '1000F', statistics: { rx_bytes: 5, tx_bytes: 5 } }
+};
+
+test('resolveUplink: without devtype a member with carrier beats the first port', () => {
+	const u = model.resolveUplink(AP_IFACES, AP_DEVS, []);
+	assert.equal(u.iface, 'lan');
+	assert.equal(u.dev, 'eth1', 'the first wired member with a link, not eth0 by list order');
+	assert.deepEqual(u.stats, AP_DEVS.eth1.statistics);
+	assert.equal(u.override, null);
+	/* an ethernet devtype with link still outranks a bare carrier */
+	const eth = { 'br-lan': { type: 'bridge', 'bridge-members': [ 'eth1', 'eth5' ] },
+		eth1: { carrier: true }, eth5: { devtype: 'ethernet', carrier: true } };
+	assert.equal(model.resolveUplink(AP_IFACES, eth, []).dev, 'eth5');
+	/* and nothing reported at all keeps the old fallback */
+	const blind = { 'br-lan': { type: 'bridge', 'bridge-members': [ 'ath0', 'eth0', 'eth1' ] }, eth0: {}, eth1: {}, ath0: {} };
+	assert.equal(model.resolveUplink(AP_IFACES, blind, []).dev, 'eth0');
+});
+
+test('resolveUplink: the override picks the interface on that device', () => {
+	const ifaces = [ ...AP_IFACES, { interface: 'vpn', up: true, l3_device: 'wg0', proto: 'wireguard', route: [] } ];
+	const devs = Object.assign({}, AP_DEVS, { wg0: { carrier: true, statistics: { rx_bytes: 7, tx_bytes: 7 } } });
+	const u = model.resolveUplink(ifaces, devs, [], 'wg0');
+	assert.equal(u.iface, 'vpn');
+	assert.equal(u.dev, 'wg0');
+	assert.equal(u.override, 'wg0');
+	assert.deepEqual(u.stats, devs.wg0.statistics);
+	/* the default stays when the override names no interface at all */
+	assert.equal(model.resolveUplink(ifaces, devs, [], 'wg9').iface, 'lan');
+});
+
+test('resolveUplink: an override with no interface moves the measurement only', () => {
+	const u = model.resolveUplink(AP_IFACES, AP_DEVS, [], 'eth3');
+	assert.equal(u.iface, 'lan');
+	assert.equal(u.l3dev, 'br-lan', 'the interface it belongs to is unchanged');
+	assert.equal(u.dev, 'eth3');
+	assert.equal(u.statsDev, 'eth3');
+	assert.equal(u.override, 'eth3');
+	assert.deepEqual(u.speed, { mbps: 1000, duplex: 'full' });
+	assert.deepEqual(u.gateway, '192.0.2.1');
+	/* a device the replies do not describe: measured as unknown, not guessed */
+	const x = model.resolveUplink(AP_IFACES, AP_DEVS, [], 'eth9');
+	assert.equal(x.dev, 'eth9');
+	assert.equal(x.stats, null);
+	assert.equal(x.carrier, null);
+	assert.equal(x.speed, null);
+	/* empty and non-strings are the same as no override */
+	for (const off of [ '', null, undefined, 0, true, {} ]) {
+		const y = model.resolveUplink(AP_IFACES, AP_DEVS, [], off);
+		assert.equal(y.dev, 'eth1', String(off));
+		assert.equal(y.override, null, String(off));
+	}
+});
+
+test('uplinkChoices: the wired members, the device in use, the override', () => {
+	const namesOf = c => c.map(x => x.name);
+	assert.deepEqual(namesOf(model.uplinkChoices(model.resolveUplink(AP_IFACES, AP_DEVS, []), AP_DEVS, [])), [ 'eth0', 'eth1', 'eth2', 'eth3' ]);
+	assert.deepEqual(model.uplinkChoices(model.resolveUplink(AP_IFACES, AP_DEVS, []), AP_DEVS, [])[1],
+		{ name: 'eth1', carrier: true, speed: { mbps: 2500, duplex: 'full' } });
+	assert.deepEqual(namesOf(model.uplinkChoices(model.resolveUplink(AP_IFACES, AP_DEVS, [], 'eth3'), AP_DEVS, [])), [ 'eth0', 'eth1', 'eth2', 'eth3' ]);
+	/* a device that is no longer a member keeps its place, to be visible and clearable */
+	assert.deepEqual(namesOf(model.uplinkChoices(model.resolveUplink(AP_IFACES, AP_DEVS, [], 'wan0'),
+		Object.assign({}, AP_DEVS, { wan0: {} }), [])), [ 'wan0', 'eth0', 'eth1', 'eth2', 'eth3' ]);
+	/* routed by name only: wireless members are not offered, by either test */
+	const wl = { 'br-lan': { type: 'bridge', 'bridge-members': [ 'phy2g-ap0', 'ath0', 'eth0' ] }, 'phy2g-ap0': {}, ath0: {}, eth0: {} };
+	assert.deepEqual(namesOf(model.uplinkChoices(model.resolveUplink(AP_IFACES, wl, [ 'phy2g-ap0' ]), wl, [ 'phy2g-ap0' ])), [ 'eth0' ]);
+	/* not a bridge, nothing to choose from but the device itself */
+	const one = { interface: 'wan', up: true, l3_device: 'eth1' };
+	assert.deepEqual(namesOf(model.uplinkChoices(model.resolveUplink([ one ], {}, []), {}, [])), [ 'eth1' ]);
+	assert.deepEqual(model.uplinkChoices(null, AP_DEVS, []), []);
+	assert.deepEqual(namesOf(model.uplinkChoices({ dev: 'eth1', l3dev: 'br-lan' }, null, [])), [ 'eth1' ]);
+});
+
+test('build: the stored uplink override reaches the model', () => {
+	const m = model.build({ ifaces: AP_IFACES, devs: AP_DEVS, wifi: {}, uplinkOverride: 'eth3' });
+	assert.equal(m.uplink.dev, 'eth3');
+	assert.equal(m.uplink.override, 'eth3');
+	const n = model.build({ ifaces: AP_IFACES, devs: AP_DEVS, wifi: {} });
+	assert.equal(n.uplink.dev, 'eth1');
+	assert.equal(n.uplink.override, null);
+});
+
 test('networks: other interfaces, not loopback or the uplink, one per device', () => {
 	const ifaces = [
 		{ interface: 'wan6', up: true, l3_device: 'eth1', proto: 'dhcpv6' },

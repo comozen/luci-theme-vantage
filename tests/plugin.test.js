@@ -67,6 +67,7 @@ function runShim(cases) {
 		const cursor = {
 			sections: () => sections.map(s => Object.assign({}, s)),
 			add: type => { const sid = 'cfg' + (++seq).toString(16).padStart(6, '0'); sections.push({ '.name': sid, '.type': type, '.anonymous': true }); return sid; },
+			named: (type, name) => { const s = find(name); if (s) return s['.type'] === type ? s : null; sections.push({ '.name': name, '.type': type, '.anonymous': false }); return name; },
 			set: (sid, opt, v) => { const s = find(sid); if (s) s[opt] = v; },
 			del: (sid, opt) => { if (opt != null) { const s = find(sid); if (s) delete s[opt]; } else sections = sections.filter(s => s['.name'] !== sid); },
 			commit: () => { if (c.fail_commit) return false; committed = true; return true; },
@@ -76,7 +77,7 @@ function runShim(cases) {
 		if (!shim.argsOk(c.method, c.args)) return { status: 2, reply: null, sections: orig, reverted };
 		const reply = c.method === 'wireless'
 			? shim.reduceWireless((c.ubus || {})['network.wireless status'])
-			: shim.setAlias(cursor, c.args || {});
+			: c.method === 'set_uplink' ? shim.setUplink(cursor, c.args || {}) : shim.setAlias(cursor, c.args || {});
 		return { status: 0, reply, sections: committed ? sections : orig, reverted };
 	});
 }
@@ -89,6 +90,9 @@ const norm = v => JSON.parse(JSON.stringify(v));
 
 const MAC = '00:00:5e:00:53:21';
 const client = (sid, mac, name, icon) => Object.assign({ '.name': sid, '.type': 'client', '.anonymous': true, mac, name }, icon ? { icon } : {});
+/* the named section /etc/config/vantage ships, with and without an override */
+const MAIN = { '.name': 'main', '.type': 'vantage', '.anonymous': false };
+const mainUplink = dev => Object.assign({}, MAIN, { uplink: dev });
 
 /* names: [ input, ok, value ] as validateAlias sees them */
 const NAMES = [
@@ -166,7 +170,27 @@ const BEHAVIOUR = [
 	/* wireless */
 	{ method: 'wireless', ubus: { 'network.wireless status': WIRELESS } },
 	{ method: 'wireless', ubus: {} },
-	{ method: 'wireless', args: { device: 'radio0' } }
+	{ method: 'wireless', args: { device: 'radio0' } },
+	/* the uplink override: one device name in main.uplink, or no option */
+	{ method: 'set_uplink', args: { device: 'eth1' } },
+	{ method: 'set_uplink', args: { device: '  phy2g-ap0.1  ' } },
+	{ method: 'set_uplink', sections: [ MAIN ], args: { device: 'br-lan' } },
+	{ method: 'set_uplink', sections: [ mainUplink('eth0') ], args: { device: 'eth3' } },
+	{ method: 'set_uplink', sections: [ mainUplink('eth0'), client('cfgold', MAC, 'Old') ], args: { device: '' } },
+	{ method: 'set_uplink', args: {} },
+	{ method: 'set_uplink', args: { device: 'eth1' }, fail_commit: true },
+	/* refusals: anything that is not a device name the kernel would use */
+	{ method: 'set_uplink', args: { device: 'eth0; rm -rf /' } },
+	{ method: 'set_uplink', args: { device: '../etc/passwd' } },
+	{ method: 'set_uplink', args: { device: 'eth 1' } },
+	{ method: 'set_uplink', args: { device: '' + 'a'.repeat(65) } },
+	{ method: 'set_uplink', args: { device: '\u202eeth1' } },
+	/* an ordinary string, kept as one: no key, no path, just a name */
+	{ method: 'set_uplink', args: { device: '__proto__' } },
+	/* rpcd's argument check */
+	{ method: 'set_uplink', args: { device: 5 } },
+	{ method: 'set_uplink', args: { device: [ 'eth1' ] } },
+	{ method: 'set_uplink', args: { device: 'eth1', mac: MAC } }
 ];
 
 const NAME_CASES = NAMES.map(([ n ]) => ({ method: 'set_alias', args: { mac: MAC, name: n } }));
@@ -241,6 +265,27 @@ test('stand-in: wireless keeps the fields the view reads and no secret', () => {
 	assert.equal(sta.config.encryption, 'wpa2+ccmp', 'anything beyond the mode string is dropped');
 	assert.deepEqual(sta.config.network, [ 'wwan' ]);
 	assert.deepEqual(runShim(BEHAVIOUR)[22].reply, {});
+});
+
+test('stand-in: set_uplink keeps one device name in main.uplink', () => {
+	const r = runShim(BEHAVIOUR);
+	assert.deepEqual(r[24].reply, { ok: true, op: 'set', device: 'eth1' });
+	assert.deepEqual(r[24].sections, [ mainUplink('eth1') ], 'the named main section is created');
+	assert.deepEqual(r[25].sections, [ mainUplink('phy2g-ap0.1') ], 'padded, and a dotted VLAN name is a device name');
+	assert.deepEqual(r[26].sections, [ mainUplink('br-lan') ]);
+	assert.deepEqual(r[27].sections, [ mainUplink('eth3') ], 'the override moves, it is not added twice');
+	assert.deepEqual(r[28].reply, { ok: true, op: 'clear', device: '' });
+	assert.deepEqual(r[28].sections, [ MAIN, client('cfgold', MAC, 'Old') ], 'names survive, only uplink goes');
+	assert.equal(Object.prototype.hasOwnProperty.call(r[28].sections[0], 'uplink'), false);
+	assert.deepEqual(r[29].sections, [ MAIN ], 'an empty device on an unset config writes nothing');
+	assert.deepEqual(r[30].reply, { ok: false, error: 'failed' });
+	assert.deepEqual(r[30].sections, [], 'nothing committed');
+	assert.equal(r[30].reverted, true, 'a failed commit drops the pending change (SEC-002)');
+	assert.deepEqual(r.slice(31, 36).map(x => x.reply.error), [ 'invalid-device', 'invalid-device', 'invalid-device', 'invalid-device', 'invalid-device' ]);
+	for (const i of [ 31, 32, 33, 34, 35 ]) assert.deepEqual(r[i].sections, [], 'refused before the config is touched');
+	assert.deepEqual(r[36].sections, [ mainUplink('__proto__') ], 'an ordinary string, never a key');
+	assert.equal(Object.getPrototypeOf(r[36].sections[0]), Object.prototype);
+	assert.deepEqual(r.slice(37, 40).map(x => x.status), [ 2, 2, 2 ]);
 });
 
 test('the model accepts what wireless returns', () => {

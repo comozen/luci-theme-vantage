@@ -785,7 +785,10 @@ uci commit luci
   see the Dashboard only when their `read` list includes `luci-app-vantage`
   (or `*`). To let them name devices, add `luci-app-vantage-names` to their
   `write` list. Without that, the dashboard works but offers no rename
-  button. Names from reverse DNS need `luci-app-vantage-rdns` in the `read`
+  button. To let them choose which network device the uplink is measured
+  on, add `luci-app-vantage-uplink` to the same list; without that, the
+  uplink drawer shows no device picker and the dashboard decides on its
+  own. Names from reverse DNS need `luci-app-vantage-rdns` in the `read`
   list as well (see [Security notes](#security-notes) before you add it).
 - The dashboard's radios and SSIDs come from the app's rpcd plugin
   (`/usr/share/rpcd/ucode/luci.vantage`). If they are missing, check that
@@ -825,6 +828,27 @@ known and nobody contradicts it.
 - Or name a device yourself: open it on the dashboard and choose **Name this
   device**. Names are saved in `/etc/config/vantage`.
 
+### The uplink card counts the wrong port
+
+The dashboard follows the bridged LAN interface to a wired member to find
+where the traffic to the network is counted. A driver that reports no
+`devtype` and no carrier for its ports leaves it guessing, usually the
+first `eth` port in netifd's list.
+
+Open the uplink card and choose the device under **Measured device**; it is
+saved as `/etc/config/vantage` `main.uplink` and applies at once. Choose
+**Automatic** to let the dashboard decide again. Without the
+`luci-app-vantage-uplink` write group, or on the command line, the same
+value:
+
+```sh
+uci set vantage.main.uplink='eth1'
+uci commit vantage
+```
+
+`uci delete vantage.main.uplink` clears it again. Reload the page after a
+change on the command line.
+
 ### "not reported" next to noise, SNR or airtime
 
 The Wi-Fi driver didn't report that value, or reported a placeholder.
@@ -852,10 +876,13 @@ Then reload the page. To remove Vantage entirely, see
 
 - **What the dashboard may do.** Its rpcd permissions (ACL) are read-only:
   system, network, radio and station status, host hints, mDNS and
-  `/proc/stat`. It cannot run commands. Its only write permission, in a
-  separate group (`luci-app-vantage-names`), is the plugin method
-  `luci.vantage set_alias`, which checks each name on the device and
-  writes nothing but `/etc/config/vantage` (at most 512 names). Details
+  `/proc/stat`. It cannot run commands. Its two write permissions, each in
+  a group of its own, are plugin methods that check their input on the
+  device and write nothing but `/etc/config/vantage`:
+  `luci.vantage set_alias` (`luci-app-vantage-names`) stores station names
+  (at most 512), and `luci.vantage set_uplink`
+  (`luci-app-vantage-uplink`) stores one network device name in
+  `main.uplink`, the device to measure as the uplink. Details
   in the README's [Security](../README.md#security) section.
 - **Wi-Fi keys.** The dashboard reads the wireless configuration through
   its own plugin method (`luci.vantage wireless`), which returns SSIDs,
