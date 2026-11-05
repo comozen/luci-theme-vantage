@@ -1,0 +1,455 @@
+/* QWRT additions to Vantage: the SFP status table, OpenClash, DiskMan,
+   form geometry and the expanded rail. Additive only: every rule here
+   overrides nothing upstream already gets right; loaded after
+   vantage.css, so it wins where both match.
+   Taken from the QWRT 1.0.10-r2 build and carried forward unchanged. */
+
+/* QWRT: live SFP table inside horizontal scroller must not use sticky headings. */
+body[data-page="admin-status-sfp-info"] #view .table .th {
+ position: static !important; top: auto !important; z-index: auto !important;
+}
+body[data-page="admin-status-sfp-info"] #view .table { margin-bottom: 0 !important; }
+/* OpenClash nests an input in a dashboard button: paint just the input. */
+.oc :is(.dashboard-buttons, .quick-actions-buttons) > button.dashboard-btn:not(.hidden):has(> input.dashboard-btn) {
+ display: contents !important;
+}
+.oc :is(.dashboard-buttons, .quick-actions-buttons) > button.dashboard-btn:not(.hidden) > input.dashboard-btn {
+ box-sizing: border-box; width: 100%; margin: 0 !important;
+}
+/* SFP: one unbroken value per cell, horizontally scroll on narrow screens. */
+body[data-page="admin-status-sfp-info"] #view .table {
+ table-layout: auto !important; width: max-content !important; min-width: 100%;
+ display: table !important;
+}
+body[data-page="admin-status-sfp-info"] #view .table thead { display: table-header-group !important; }
+body[data-page="admin-status-sfp-info"] #view .table tbody { display: table-row-group !important; }
+body[data-page="admin-status-sfp-info"] #view .table tr { display: table-row !important; }
+body[data-page="admin-status-sfp-info"] #view .table :is(th,td) {
+ display: table-cell !important; white-space: nowrap !important; word-break: normal !important;
+ overflow-wrap: normal !important; vertical-align: middle; padding: 12px 14px !important;
+}
+body[data-page="admin-status-sfp-info"] #view .table .label {
+ display: inline-flex !important; align-items: center; white-space: nowrap !important;
+ height: auto !important; min-height: 24px; line-height: 1.5 !important; overflow: visible !important;
+}
+/* QWRT: quieter, clearer second-level navigation. */
+html[data-rail="pinned"] .vt-rail-sub {
+ margin: 4px 10px 10px 24px; padding: 4px 0 4px 10px;
+ border-left: 1px solid var(--line-2);
+}
+html[data-rail="pinned"] .vt-rail-sub > li + li { margin-top: 3px; }
+html[data-rail="pinned"] .vt-rail-sub a {
+ position: relative; display: flex; align-items: center;
+ min-height: 34px; padding: 6px 10px 6px 16px;
+ border: 1px solid transparent; border-radius: 8px;
+ font-size: 13px; line-height: 1.4; font-weight: 400;
+ color: var(--text-2); transition: background-color .12s, color .12s, border-color .12s;
+}
+html[data-rail="pinned"] .vt-rail-sub a:hover {
+ background: var(--s3); color: var(--text); border-color: var(--line-2);
+}
+html[data-rail="pinned"] .vt-rail-sub a[aria-current="page"] {
+ background: var(--accent-soft); color: var(--accent-text);
+ border-color: transparent; font-weight: 600;
+}
+html[data-rail="pinned"] .vt-rail-sub a[aria-current="page"]::before {
+ content: ''; position: absolute; left: 6px; width: 4px; height: 16px;
+ border-radius: 3px; background: var(--accent-text);
+}
+.vt-fly-list { padding: 10px; }
+.vt-fly-list > li + li { margin-top: 4px; }
+.vt-fly-link { border-radius: 9px; min-height: 38px; padding: 8px 12px; }
+.vt-fly-sub { margin: 5px 0 8px 22px; padding-left: 8px; }
+.vt-fly-sub a { padding: 7px 10px; margin: 2px 0; border-radius: 7px; line-height: 1.4; }
+.vt-fly-sub a[aria-current] { background: var(--accent-soft); box-shadow: none; }
+.vt-rail-sub a:focus-visible, .vt-fly-link:focus-visible, .vt-fly-sub a:focus-visible {
+ outline: 2px solid var(--accent-text); outline-offset: 1px;
+}
+/* QWRT Vantage / OpenClash palette bridge, follows the LuCI light/dark toggle. */
+html[data-darkmode] body[data-page^="admin-services-openclash"] .oc {
+ --bg-white: var(--s1); --bg-light: var(--s2); --bg-gray: var(--s3);
+ --text-primary: var(--text); --text-secondary: var(--text-2); --text-title: var(--text);
+ --border-color: var(--line-2); --border-light: var(--line);
+ --hover-bg: var(--s3); --select-hover: var(--s4);
+ --primary-color: var(--accent-text); --btn-primary-hover: var(--accent-line);
+ --primary-a5: color-mix(in srgb, var(--accent-text) 5%, transparent);
+ --primary-a10: var(--accent-soft);
+ --primary-a20: color-mix(in srgb, var(--accent-text) 20%, transparent);
+ --primary-a30: color-mix(in srgb, var(--accent-text) 30%, transparent);
+ --primary-a40: color-mix(in srgb, var(--accent-text) 40%, transparent);
+ --primary-a50: color-mix(in srgb, var(--accent-text) 50%, transparent);
+ --primary-a60: color-mix(in srgb, var(--accent-text) 60%, transparent);
+ --primary-bright: var(--accent-text); --primary-soft: var(--accent-text);
+ --card-bg-start: var(--s2); --card-btn-bg: var(--accent-text);
+ --announcement-end: var(--s3); --editor-bg: var(--s2); --switch-off-bg: var(--s4);
+ --tab-hover-dark-bg: var(--s3); --tab-text-dark: var(--text-2);
+ --radius-sm: 7px; --radius-md: 8px; --radius-lg: 10px;
+ --control-height: 34px; --control-row-height: 34px;
+}
+html[data-darkmode="true"] body[data-page^="admin-services-openclash"] .oc { --text-on-primary: var(--accent-ink); }
+html[data-darkmode="false"] body[data-page^="admin-services-openclash"] .oc { --text-on-primary: #fff; }
+body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) {
+ display: grid !important; grid-template-columns: repeat(4,minmax(92px,1fr));
+ gap: 8px !important; align-items: center !important; flex: 0 0 auto;
+}
+body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) input.dashboard-btn {
+ height: 34px !important; min-height: 34px !important; width: 100% !important;
+ padding: 0 12px !important; margin: 0 !important;
+ white-space: nowrap !important; overflow-wrap: normal !important;
+ font-size: 12px !important; line-height: 32px !important; font-weight: 500 !important;
+ border-radius: 7px !important; box-shadow: none !important;
+ background: var(--accent-soft) !important; color: var(--accent-text) !important;
+ border: 1px solid var(--line-2) !important;
+}
+body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) input.dashboard-btn:hover {
+ background: var(--accent) !important; color: var(--accent-ink) !important; border-color: var(--accent) !important;
+}
+body[data-page^="admin-services-openclash"] .oc :is(.announcement-banner,.oix-announcement) {
+ background: var(--s2) !important; color: var(--text) !important; border: 1px solid var(--line) !important;
+}
+@media (max-width: 640px) {
+ body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) {
+  grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px !important;
+ }
+ body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) input.dashboard-btn {
+  height: 32px !important; min-height: 32px !important; padding: 0 10px !important; line-height: 30px !important;
+ }
+}
+/* Compact text actions, with room for labels rather than narrow squares. */
+html body .vt-main :is(input.cbi-button,button.cbi-button,a.cbi-button):not(.vt-acts-hidden):not(.cbi-button-up):not(.cbi-button-down):not(.drag-handle) {
+ box-sizing: border-box; min-width: 64px; height: 34px !important; min-height: 34px !important;
+ padding: 0 13px !important; border-radius: 8px !important; font-size: 13px !important;
+ line-height: 32px !important; white-space: nowrap !important; vertical-align: middle;
+}
+html body .vt-main :is(.cbi-button-up,.cbi-button-down,.vt-acts-more) {
+ min-width: 34px !important; width: 34px !important; height: 34px !important;
+ min-height: 34px !important; padding: 0 !important; border-radius: 8px !important;
+}
+html body .vt-main :is(.cbi-page-actions,.cbi-section-actions > div,.vt-acts) {
+ gap: 8px; align-items: center;
+}
+body[data-page^="admin-services-openclash"] .oc-cbi-table .tr:has(input[id$=".Commit"]):has(input[id$=".Apply"]) {
+ display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px;
+ padding: 12px !important; background: transparent !important;
+}
+body[data-page^="admin-services-openclash"] .oc-cbi-table .tr:has(input[id$=".Commit"]):has(input[id$=".Apply"]) > .td {
+ display: block !important; padding: 0 !important; width: auto !important; min-width: 0 !important;
+}
+body[data-page^="admin-services-openclash"] .oc-cbi-table .tr:has(input[id$=".Commit"]):has(input[id$=".Apply"]) input.cbi-button {
+ width: 100% !important; max-width: none !important; margin: 0 !important;
+}
+@media (max-width:720px) {
+ html body .vt-main .cbi-page-actions { display:flex; flex-direction:row; flex-wrap:wrap; gap:8px; }
+ html body .vt-main .cbi-page-actions :is(input.cbi-button,button.cbi-button,a.cbi-button) {
+  flex: 1 1 auto; width: auto !important; max-width: 100%;
+ }
+ html body .vt-main .cbi-section-create .cbi-button { min-width: 72px; }
+ html body .vt-main .cbi-tabmenu { flex-wrap: nowrap; overflow-x: auto; }
+ html body .vt-main .cbi-tabmenu > li { flex: 0 0 auto; }
+ body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) {
+  grid-template-columns: repeat(auto-fit,minmax(94px,1fr)) !important;
+ }
+}
+/* Allow three short actions to share a row; long provider labels share two. */
+body[data-page^="admin-services-openclash"] .oc-cbi-table .tr:has(input[id$=".Commit"]):has(input[id$=".Apply"]) {
+ grid-template-columns: repeat(auto-fit,minmax(100px,1fr));
+}
+body[data-page^="admin-services-openclash"] .oc-cbi-table .tr:has(input[id$=".proxy_mg"]):has(input[id$=".rule_mg"]) {
+ display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; padding: 12px !important;
+}
+body[data-page^="admin-services-openclash"] .oc-cbi-table .tr:has(input[id$=".proxy_mg"]):has(input[id$=".rule_mg"]) > .td {
+ display: block !important; width: auto !important; padding: 0 !important; min-width: 0 !important;
+}
+body[data-page^="admin-services-openclash"] .oc-cbi-table .tr:has(input[id$=".proxy_mg"]):has(input[id$=".rule_mg"]) input.cbi-button {
+ width: 100% !important; margin: 0 !important; font-size: 12px !important; padding: 0 6px !important;
+}
+/* QWRT shared form geometry: inputs and adjacent actions align. */
+html body .vt-main :is(.cbi-input-text,.cbi-input-password,input[type="text"],input[type="password"],input[type="number"],input[type="search"],input[type="url"],select) {
+ box-sizing: border-box; height: 36px !important; min-height: 36px !important;
+ padding: 6px 10px !important; line-height: 22px; border-radius: 8px;
+ max-width: 100%; color: var(--text); background-color: var(--s2);
+}
+html body .vt-main :is(input.cbi-button,button.cbi-button,a.cbi-button,.cbi-dropdown.btn) {
+ height: 36px !important; min-height: 36px !important; line-height: 34px !important;
+}
+html body .vt-main .control-group { display: flex; align-items: stretch; gap: 0; max-width: 100%; }
+html body .vt-main .control-group > input { flex: 1 1 auto; min-width: 0; width: 0; border-radius: 8px 0 0 8px; }
+html body .vt-main .control-group > :is(button,.cbi-button) { flex: 0 0 auto; margin: 0; border-radius: 0 8px 8px 0 !important; }
+html body .vt-main .control-group:has(> input.cbi-input-password) > button {
+ min-width: 40px !important; width: 40px !important; padding: 0 !important;
+}
+html body .vt-main :is(textarea,.cbi-input-textarea) {
+ box-sizing: border-box; max-width: 100%; border-radius: 8px;
+ color: var(--text); background: var(--s2); padding: 9px 11px;
+ line-height: 1.5; font-size: 13px; resize: vertical;
+}
+@media (max-width: 720px) {
+ :root { --ctl-h: 36px; }
+ html body .vt-main .vt-tabs { overflow: hidden; }
+ html body .vt-tabs :is(ul,[role="tablist"]) { flex-wrap: nowrap !important; overflow-x: auto; justify-content: flex-start; }
+ html body .vt-tabs a { white-space: nowrap; flex: 0 0 auto; }
+ html body .vt-main .cbi-value { padding: 9px 0; }
+ html body .vt-main .cbi-value-title { line-height: 1.5; margin-bottom: 7px; }
+ html body .vt-main .cbi-value-field { min-width: 0; max-width: 100%; }
+ html body .vt-main .table .tr > .td:has(textarea) { flex-basis: 100% !important; width: 100% !important; }
+ html body .vt-main .table .tr > .td:has(textarea) textarea { width: 100% !important; min-height: 84px; }
+ html body .vt-main .table .tr > .td.cbi-section-actions { display: flex !important; flex-wrap: wrap; gap: 8px; }
+ html body .vt-main .table .tr > .td.cbi-section-actions :is(.vt-acts,div) { flex-wrap: wrap; gap: 6px; max-width: 100%; }
+ html body .vt-main :is(.cbi-button-up,.cbi-button-down,.vt-acts-more,.drag-handle) { min-width: 36px !important; width: 36px !important; height: 36px !important; }
+ html body .vt-main .cbi-dropdown.btn { display: inline-flex; align-items: center; }
+ html body .vt-main .cbi-dropdown.btn > ul { align-items: stretch; }
+ body[data-page^="admin-services-openclash"] .oc-cbi-table .tr:has(input[type="text"]):not(:has(textarea)) { gap: 8px; }
+ body[data-page^="admin-services-openclash"] .oc-cbi-table .tr > .td:has(input[type="text"]) { flex-basis: 100% !important; width: 100% !important; }
+ body[data-page^="admin-services-openclash"] .oc-cbi-table input[type="text"] { width: 100% !important; }
+}
+/* Wireless desktop: pair each radio and its configured SSID on one line. */
+/* Keep this above earlier compact-button specificity, including paired controls. */
+html body[data-page] .vt-main :is(input.cbi-button,button.cbi-button,a.cbi-button):not(.vt-acts-hidden):not(.cbi-button-up):not(.cbi-button-down):not(.drag-handle) {
+ height: 36px !important; min-height: 36px !important; line-height: 34px !important;
+}
+@media (max-width:720px) {
+ html body .vt-tabs .vt-pagetabs { display:flex; flex-wrap:nowrap !important; overflow-x:auto; justify-content:flex-start; scrollbar-width:thin; }
+ html body .vt-tabs .vt-pagetabs > .vt-tab { flex:0 0 auto; white-space:nowrap; }
+}
+/* QWRT audit 2026-10-29: consistent field rhythm across native and legacy views. */
+:root { --field-max: 420px; }
+html body .vt-main .cbi-value:not(.td) > .cbi-value-field :is(input[type="text"],input[type="password"],input[type="number"],input[type="email"],input[type="url"],input[type="search"],input:not([type]),select):not(.control-group > *):not(.cbi-dynlist input):not(.cbi-dropdown input) {
+ width: 100% !important; min-width: 0 !important; max-width: min(100%,var(--field-max)) !important;
+}
+html body .vt-main .cbi-value:not(.td) > .cbi-value-field :is(.control-group:has(input,select,.cbi-dropdown),.cbi-dynlist,.cbi-dropdown) {
+ box-sizing: border-box; width: 100%; max-width: min(100%,var(--field-max)) !important; min-width: 0;
+}
+html body .vt-main .control-group > :is(input,select,.cbi-dropdown) { max-width: none !important; }
+html body .vt-main .cbi-dropdown { border-radius: 8px; }
+html body .vt-main .cbi-value:not(.td) > .cbi-value-field textarea:not([readonly]):not([rows]) {
+ width: 100%; max-width: min(100%,var(--field-max));
+}
+html body .vt-main .cbi-value:not(.td) > .cbi-value-field :is(input[type="date"],input[type="time"],input[type="datetime-local"]) {
+ box-sizing: border-box; height:36px; border-radius:8px; max-width:min(100%,var(--field-max));
+}
+@media (max-width:720px) {
+ html body .vt-main .cbi-value:not(.td) > .cbi-value-field :is(input[type="text"],input[type="password"],input[type="number"],input[type="email"],input[type="url"],input[type="search"],input:not([type]),select):not(.control-group > *):not(.cbi-dynlist input):not(.cbi-dropdown input),
+ html body .vt-main .cbi-value:not(.td) > .cbi-value-field :is(.control-group:has(input,select,.cbi-dropdown),.cbi-dynlist,.cbi-dropdown) { max-width:100% !important; }
+}
+/* OpenClash uses a quieter olive action colour; state colours remain distinct. */
+body[data-page^="admin-services-openclash"] .vt-main {
+ --accent:#a6bb58; --accent-hover:#99ae4c; --accent-ink:#17200b;
+ --accent-text:#52652a; --accent-line:#879d43; --accent-soft:rgba(142,162,72,.13);
+}
+html[data-darkmode="true"] body[data-page^="admin-services-openclash"] .vt-main {
+ --accent:#91a44c; --accent-hover:#a0b45a; --accent-text:#b3c772;
+ --accent-line:#7e913f; --accent-soft:rgba(151,172,77,.14);
+}
+/* A single uninterrupted separator per radio, rather than a border per cell. */
+/* Remaining cases discovered during the full menu audit. */
+html body .vt-main input[type="file"] {
+ box-sizing:border-box; width:100%; max-width:min(100%,var(--field-max));
+ min-width:0; height:36px; padding:0; font-size:13px; line-height:34px;
+ border:1px solid var(--line-2); border-radius:8px; background:var(--s2);
+}
+html body .vt-main input[type="file"]::file-selector-button {
+ height:34px; padding:0 12px; margin:0 10px 0 0; border:0;
+ border-right:1px solid var(--line-2); background:var(--s3); color:var(--text); font:inherit;
+}
+body[data-page^="admin-services-openclash"] .vt-main .oc .icon-btn {
+ width:32px !important; height:32px !important; min-width:32px !important; min-height:32px !important;
+ padding:0 !important; border-radius:8px !important;
+}
+body[data-page^="admin-services-openclash"] .vt-main .sub_setting {
+ width:28px !important; height:28px !important; min-width:28px !important;
+ display:inline-flex; align-items:center; justify-content:center; padding:5px;
+ border:1px solid var(--line); border-radius:7px; background:var(--s3); color:var(--text-2);
+}
+html body[data-page^="admin-services-openclash"] .vt-main button.cbi-button.oc-actions-menu-btn {
+ min-width:36px !important; width:36px !important; padding:0 !important;
+}
+@media (max-width:720px) {
+ body[data-page^="admin-services-openclash"] .vt-main .table .tr > .td:has(.oc-actions-menu),
+ body[data-page^="admin-services-openclash"] .vt-main .table .tr > .td:has(.sub_div) {
+  flex-basis:100% !important; width:100% !important;
+ }
+ body[data-page^="admin-services-openclash"] .vt-main .table .td:has(.oc-actions-menu) div:has(> .oc-actions-menu) {
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap; width:100%; min-width:0;
+ }
+ body[data-page^="admin-services-openclash"] .vt-main .sub_div {
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap; max-width:100%;
+ }
+ body[data-page^="admin-services-openclash"] .vt-main .sub_tab_show { flex:1 1 180px; min-width:0; }
+}
+/* The built-in connection checks use floated half-width blocks. */
+body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style:has(> .oc-text-center) {
+ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px;
+}
+body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-text-center {
+ display:flex; align-items:center; gap:8px; flex-wrap:wrap; float:none !important;
+ width:100% !important; min-width:0; white-space:normal !important; text-align:left;
+}
+body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-text-center input[type="text"] {
+ flex:1 1 160px; min-width:0; width:160px; max-width:100%; margin:0;
+}
+body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-text-center .cbi-button { margin:0 !important; flex:0 0 auto; }
+@media(max-width:720px) {
+ body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style:has(> .oc-text-center) { grid-template-columns:minmax(0,1fr); }
+}
+body[data-page^="admin-services-openclash"] .vt-main { --accent:#c8f031; --accent-hover:#b9e421; --accent-ink:#151b00; --accent-text:#4b6600; --accent-line:#8db20f; --accent-soft:rgba(122,163,0,.13); }
+html[data-darkmode="true"] body[data-page^="admin-services-openclash"] .vt-main { --accent:#c8f031; --accent-hover:#d3f44f; --accent-text:#c8f031; --accent-line:#a1c821; --accent-soft:rgba(200,240,49,.13); }
+html body .vt-main :is(input.cbi-button,button.cbi-button,a.cbi-button) { border-radius:8px !important; }
+body[data-page="admin-system-filetransfer"] .vt-main input[type="submit"] { width:auto !important; min-width:96px; margin-top:8px; }
+/* Form controls: individual rounded controls, including attached action groups. */
+html body :is(.vt-main, .modal) :is(input[type="text"],input[type="password"],input[type="number"],input[type="email"],input[type="url"],input[type="search"],input[type="date"],input[type="time"],input[type="datetime-local"],input:not([type]),textarea,select,.cbi-dropdown:not(.btn,.cbi-button)) {
+ box-sizing:border-box; border-radius:8px !important;
+}
+html body :is(.vt-main, .modal) :is(input.cbi-button,button.cbi-button,a.cbi-button,button.btn,a.btn,input[type="submit"],input[type="button"],input[type="reset"],button:not([class])) {
+ border-radius:8px !important; box-sizing:border-box;
+}
+/* LuCI's default control-group strips inner corner radii and overlaps borders. */
+html body :is(.vt-main, .modal) .control-group {
+ gap:6px !important; align-items:center; min-width:0;
+}
+html body :is(.vt-main, .modal) .control-group > :not(:first-child),
+html body :is(.vt-main, .modal) .control-group > :not(:last-child) {
+ margin-left:0 !important; border-radius:8px !important;
+}
+html body :is(.vt-main, .modal) .control-group > :is(input:not([type="button"]):not([type="submit"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,.cbi-dropdown:not(.btn,.cbi-button)) {
+ min-width:0; flex:1 1 0; width:0; max-width:none !important;
+}
+html body :is(.vt-main, .modal) .control-group > :is(button,.cbi-button,.btn) {
+ flex:0 0 auto; height:36px !important; min-height:36px !important; line-height:34px !important;
+}
+/* Preserve multi-select visibility and rounded file-picker outer shape. */
+html body :is(.vt-main, .modal) select[multiple] { height:auto !important; min-height:88px !important; }
+html body :is(.vt-main, .modal) input[type="file"] { border-radius:8px !important; overflow:hidden; }
+html body :is(.vt-main, .modal) input[type="file"]::file-selector-button { border-radius:7px 0 0 7px; }
+/* OpenClash: match Vantage without obscuring subscription figures. */
+body[data-page^="admin-services-openclash"] .vt-main .oc .progress_bar_bg {
+  border:1px solid var(--line-2); border-radius:8px; background:var(--s3);
+  overflow:hidden; box-shadow:none; min-width:0 !important;
+}
+body[data-page^="admin-services-openclash"] .vt-main .oc .progress_bar_fill {
+  height:100%; border-radius:7px; box-shadow:none;
+}
+body[data-page^="admin-services-openclash"] .vt-main .oc .progress_bar_high {
+  background:color-mix(in srgb, var(--accent) 27%, var(--s3)) !important;
+}
+body[data-page^="admin-services-openclash"] .vt-main .oc .progress_bar_text {
+  color:var(--text); font-size:11px; text-shadow:none;
+}
+body[data-page^="admin-services-openclash"] .vt-main :is(.cbi-button,.dashboard-btn,.icon-btn,.sub_setting):not(:focus-visible) {
+  box-shadow:none !important;
+}
+body[data-page^="admin-services-openclash"] .vt-main :is(.cbi-button,.dashboard-btn,.icon-btn,.sub_setting) {
+  border-radius:8px !important;
+}
+/* Keep file operations compact without changing their behavior. */
+body[data-page="admin-system-filetransfer"] .vt-main input[type="submit"] {
+  width:auto !important; min-width:96px; max-width:100%; height:36px !important;
+  margin-top:8px; padding:0 16px !important; border-radius:8px !important;
+}
+body[data-page="admin-system-filetransfer"] .vt-main :is(input[type="file"],input[type="text"]) {
+  width:100%; max-width:min(100%,var(--field-max)); border-radius:8px !important;
+}
+/* DiskMan partition bars: round ends, use the theme accent and preserve segment proportions. */
+body[data-page="admin-system-diskman-disks"] :is([id^="cbi-disk-"] + tr,[id^="cbi-_raid-"] + tr) > td[colspan="15"] {
+ padding: 8px 12px !important; white-space: nowrap; overflow: hidden;
+}
+body[data-page="admin-system-diskman-disks"] :is([id^="cbi-disk-"] + tr,[id^="cbi-_raid-"] + tr) > td[colspan="15"] > div[title][style*="background-color"] {
+ box-sizing:border-box; min-height:26px; line-height:26px; overflow:hidden; text-overflow:ellipsis;
+ color:var(--accent-ink) !important; background:var(--accent) !important;
+}
+body[data-page="admin-system-diskman-disks"] :is([id^="cbi-disk-"] + tr,[id^="cbi-_raid-"] + tr) > td[colspan="15"] > div[title]:first-child { border-radius:8px 0 0 8px; }
+body[data-page="admin-system-diskman-disks"] :is([id^="cbi-disk-"] + tr,[id^="cbi-_raid-"] + tr) > td[colspan="15"] > div[title]:last-child { border-radius:0 8px 8px 0; }
+body[data-page="admin-system-diskman-disks"] :is([id^="cbi-disk-"] + tr,[id^="cbi-_raid-"] + tr) > td[colspan="15"] > div[title]:only-child { border-radius:8px; }
+body[data-page="admin-system-diskman-disks"] :is([id^="cbi-disk-"] + tr,[id^="cbi-_raid-"] + tr) > td[colspan="15"] > div[title]:nth-child(even) { background:color-mix(in srgb,var(--accent) 64%,var(--s2)) !important; }
+/* Align upstream detail labels and place the device badge at a shared baseline. */
+body[data-page="admin-status-overview"] .network-status-table:has(> .ifacebox:nth-child(2)):not(:has(> .ifacebox:nth-child(3))) { grid-template-columns:repeat(2,minmax(0,1fr)); }
+body[data-page="admin-status-overview"] .network-status-table > .ifacebox { height:100%; }
+body[data-page="admin-status-overview"] .network-status-table .ifacebox-body { flex:1; min-width:0; }
+body[data-page="admin-status-overview"] .network-status-table .ifacebox-body > span:has(> .nowrap) { grid-template-columns:92px minmax(0,1fr); }
+body[data-page="admin-status-overview"] .network-status-table .ifacebox-body > div:not(:empty) { margin-top:auto; }
+@media(max-width:720px) {
+ body[data-page="admin-status-overview"] .network-status-table:has(> .ifacebox:nth-child(2)):not(:has(> .ifacebox:nth-child(3))) { grid-template-columns:minmax(0,1fr); }
+ body[data-page="admin-status-overview"] .network-status-table .ifacebox-body > span:has(> .nowrap) { grid-template-columns:80px minmax(0,1fr); }
+}
+html body[data-page="admin-system-filetransfer"] .vt-main input.cbi-button.cbi-input-apply[type="submit"]:not(.vt-acts-hidden):not(.cbi-button-up):not(.cbi-button-down):not(.drag-handle) { width:auto !important; max-width:100% !important; min-width:96px !important; flex:0 0 auto !important; }
+body[data-page="admin-system-filetransfer"] .vt-main input.cbi-input-apply { justify-self:start !important; }
+/* Read-only text is information, not a disabled control; keep it legible. */
+html[data-darkmode="true"] body :is(.vt-main,.modal) input[readonly]:not(:disabled),
+html[data-darkmode="true"] body :is(.vt-main,.modal) textarea[readonly]:not(:disabled) {
+ opacity:1; color:var(--text); cursor:default;
+}
+/* OpenClash provider buttons: center in each column and remove scroll shadows. */
+body[data-page^="admin-services-openclash"] .vt-main .cbi-section:has(input[id$=".proxy_mg"]):has(input[id$=".rule_mg"]) {
+ background-image:none !important; box-shadow:none !important;
+}
+body[data-page^="admin-services-openclash"] .vt-main .oc-cbi-table .tr:has(input[id$=".proxy_mg"]):has(input[id$=".rule_mg"]) > .td {
+ background:transparent !important; box-shadow:none !important;
+}
+body[data-page^="admin-services-openclash"] .vt-main :is([id$="-proxy_mg"],[id$="-rule_mg"]) {
+ display:flex !important; justify-content:center !important; align-items:center; width:100%; background:transparent !important; box-shadow:none !important;
+}
+body[data-page^="admin-services-openclash"] .vt-main :is(input[id$=".proxy_mg"],input[id$=".rule_mg"]) {
+ width:min(100%,220px) !important; max-width:100% !important; margin:0 auto !important; box-shadow:none !important;
+}
+/* DiskMan: preserve segment ratios while allowing the bar to span its card. */
+@media(max-width:720px) {
+ body[data-page="admin-system-diskman-disks"] :is([id^="cbi-disk-"] + tr,[id^="cbi-_raid-"] + tr) {
+  display:block !important; width:100% !important; box-sizing:border-box;
+ }
+ body[data-page="admin-system-diskman-disks"] :is([id^="cbi-disk-"] + tr,[id^="cbi-_raid-"] + tr) > td[colspan="15"] {
+  display:block !important; width:100% !important; box-sizing:border-box; padding:10px 12px !important; white-space:nowrap; overflow:hidden;
+ }
+}
+html body[data-page^="admin-services-openclash"] .vt-main .oc-cbi-table .tr:has(input[id$=".proxy_mg"]):has(input[id$=".rule_mg"]) input.cbi-button { width:min(100%,220px) !important; max-width:220px !important; }
+/* Keep ordinary page action toolbars transparent; preserve action button fills. */
+html body .vt-main .cbi-page-actions {
+ background:transparent !important; background-image:none !important;
+ border:0 !important; box-shadow:none !important;
+ -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+ padding:0 !important;
+}
+/* The five maintenance actions share a consistent size; danger color remains native. */
+html body[data-page="admin-system-flash"] .vt-main button.cbi-button.important:not(.vt-acts-hidden):not(.cbi-button-up):not(.cbi-button-down):not(.drag-handle) {
+ width:128px !important; min-width:128px !important; max-width:100%;
+ height:36px !important; min-height:36px !important;
+ display:inline-flex; align-items:center; justify-content:center;
+ text-align:center !important; font-size:13px !important; white-space:nowrap;
+}
+@media(max-width:720px) {
+ html body[data-page="admin-system-flash"] .vt-main button.cbi-button.important:not(.vt-acts-hidden):not(.cbi-button-up):not(.cbi-button-down):not(.drag-handle) {
+  width:min(128px,100%) !important; min-width:0 !important;
+ }
+}
+/* Align the system-log filter controls in two consistent columns. */
+#content_syslog > div:has(> #logFacilitySelect),
+#content_syslog > div:has(> #logTextFilter) {
+ display:grid; grid-template-columns:28px 16px 50px minmax(0, 1fr) 28px 16px 50px minmax(0, 1fr);
+ align-items:center; column-gap:8px; row-gap:8px; max-width:900px;
+}
+#content_syslog > div:has(> #logFacilitySelect) > *,
+#content_syslog > div:has(> #logTextFilter) > * { margin:0 !important; min-width:0; }
+#content_syslog :is(#logFacilitySelect,#logSeveritySelect,#logTextFilter,#logMaxRows) {
+ box-sizing:border-box; width:100% !important; max-width:none !important; height:36px !important; min-height:36px !important;
+}
+#content_syslog label[for="logMaxRows"] { grid-column:5 / 8; justify-self:start; }
+#content_syslog #logMaxRows { grid-column:8; }
+@media(max-width:720px) {
+ #content_syslog > div:has(> #logFacilitySelect),
+ #content_syslog > div:has(> #logTextFilter) { grid-template-columns:28px 16px 50px minmax(0,1fr); }
+ #content_syslog label[for="logMaxRows"] { grid-column:1 / 4; }
+ #content_syslog #logMaxRows { grid-column:4; }
+}
+/* Connection/DNS diagnostics: aligned labels and fields without a background strip. */
+body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style:has(> .oc-text-center) {
+ background:transparent !important; border:0 !important; box-shadow:none !important;
+}
+body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-text-center {
+ display:grid !important; grid-template-columns:78px minmax(0,1fr) auto;
+ align-items:center; gap:8px; background:transparent !important; box-shadow:none !important;
+ color:var(--text); text-align:left;
+}
+body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-text-center input[type="text"] {
+ width:100% !important; max-width:none !important; min-width:0;
+}
+@media(max-width:720px) {
+ body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-text-center { grid-template-columns:72px minmax(0,1fr) auto; }
+}

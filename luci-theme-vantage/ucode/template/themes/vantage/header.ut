@@ -35,6 +35,7 @@
 })(document.documentElement);
 </script>
 <link rel="stylesheet" href="{{ media }}/vantage.css">
+<link rel="stylesheet" href="{{ media }}/qwrt.css">
 <link rel="stylesheet" href="{{ media }}/icons.css">
 <link rel="icon" href="{{ media }}/logo.svg" type="image/svg+xml">
 <script src="{{ entityencode(dispatcher.build_url('admin/translations', dispatcher.lang), true) }}"></script>
