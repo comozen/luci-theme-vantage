@@ -98,6 +98,9 @@ jobs:
   build:
     name: Build packages (OpenWrt ${{ matrix.sdk }})
     needs: checks
+    # a push to qwrt only runs the checks: the qwrt-v* tag is what builds
+    # and publishes, so the same commit is not packaged twice
+    if: github.ref != 'refs/heads/qwrt' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     # a tag push builds in the release-signing environment (approved per
