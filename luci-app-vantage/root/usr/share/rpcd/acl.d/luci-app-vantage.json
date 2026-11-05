@@ -11,7 +11,7 @@
 				"network.interface": [ "dump" ],
 				"network.device": [ "status" ],
 				"luci-rpc": [ "getHostHints" ],
-				"luci": [ "getSwconfigPortState" ],
+				"luci": [ "getMountPoints", "getSwconfigPortState" ],
 				"luci.vantage": [ "counters", "thermal", "wired", "wireless" ],
 				"iwinfo": [ "assoclist", "info" ],
 				"hostapd.*": [ "get_clients", "get_status" ],

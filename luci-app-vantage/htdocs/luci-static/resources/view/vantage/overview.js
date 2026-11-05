@@ -39,6 +39,8 @@ var callInfo = rpc.declare({ object: 'system', method: 'info' });
 var callRead = rpc.declare({ object: 'file', method: 'read', params: [ 'path' ], expect: { data: '' } });
 var callIfDump = rpc.declare({ object: 'network.interface', method: 'dump', expect: { 'interface': [] } });
 var callDevs = rpc.declare({ object: 'network.device', method: 'status', expect: { '': {} } });
+/* filesystem usage where system.info carries none (QWRT's rpcd) */
+var callMounts = rpc.declare({ object: 'luci', method: 'getMountPoints', expect: { result: [] } });
 var callDev = rpc.declare({ object: 'network.device', method: 'status', params: [ 'name' ], expect: { '': {} } });
 /* luci.vantage is the app's own rpcd ucode plugin: network.wireless status
    without keys or RADIUS secrets, and the validated alias write */
@@ -97,6 +99,30 @@ var VANTAGE_MEDIA = /(^|[/])vantage[/]*$/;
 function vantageTheme() {
 	var media = L.env.media || '';
 	return VANTAGE_MEDIA.test(media);
+}
+
+/* system.info names the root and tmp filesystems on OpenWrt; where rpcd
+   leaves them out, luci.getMountPoints has the same numbers in bytes */
+function storageFromMounts(reply) {
+	var list = (reply && Array.isArray(reply.result)) ? reply.result : [], found = {};
+	list.forEach(function(m) {
+		if (!m || typeof m.mount !== 'string' || !(m.size > 0)) return;
+		if (!found[m.mount]) found[m.mount] = m;
+	});
+	var kb = function(m) {
+		return m ? { total: Math.round(m.size / 1024), used: Math.round((m.size - (m.free || 0)) / 1024), avail: Math.round((m.avail || 0) / 1024) } : null;
+	};
+	return { root: kb(found['/']), tmp: kb(found['/tmp']) };
+}
+
+function fillStorage(info) {
+	if (info.root && info.tmp) return Promise.resolve(info);
+	return L.resolveDefault(callMounts(), {}).then(function(reply) {
+		var st = storageFromMounts(reply);
+		if (!info.root && st.root) info.root = st.root;
+		if (!info.tmp && st.tmp) info.tmp = st.tmp;
+		return info;
+	});
 }
 
 /* iwinfo's assoclist carries no byte counters on QSDK: ask the plugin for
@@ -699,10 +725,12 @@ return view.extend({
 				});
 				var switchState = Object.create(null);
 				Object.keys(swState).forEach(function(n) { switchState[n] = swState[n].ports; });
-				return fillCounters(ifnames, assoc).then(function() {
-					return { info: r[0] || {}, stat: r[1] || '', ifaces: r[2] || [], devs: r[3] || {}, wifi: wifiDevs, hints: r[5] || {}, thermal: r[6] || [],
-						fdb: Array.isArray(wiredReply.hosts) ? wiredReply.hosts : [], fdbCrowded: wiredReply.crowded === true, switches: switches, switchState: switchState,
-						assoc: assoc, hapd: hapd, hapdStatus: hapdStatus, iwinfo: iwinfo, at: Date.now(), started: started };
+				return fillStorage(r[0] || {}).then(function(info) {
+					return fillCounters(ifnames, assoc).then(function() {
+						return { info: info, stat: r[1] || '', ifaces: r[2] || [], devs: r[3] || {}, wifi: wifiDevs, hints: r[5] || {}, thermal: r[6] || [],
+							fdb: Array.isArray(wiredReply.hosts) ? wiredReply.hosts : [], fdbCrowded: wiredReply.crowded === true, switches: switches, switchState: switchState,
+							assoc: assoc, hapd: hapd, hapdStatus: hapdStatus, iwinfo: iwinfo, at: Date.now(), started: started };
+					});
 				});
 			});
 		});
