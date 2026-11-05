@@ -104,7 +104,7 @@ function vantageTheme() {
 /* system.info names the root and tmp filesystems on OpenWrt; where rpcd
    leaves them out, luci.getMountPoints has the same numbers in bytes */
 function storageFromMounts(reply) {
-	var list = (reply && Array.isArray(reply.result)) ? reply.result : [], found = {};
+	var list = Array.isArray(reply) ? reply : ((reply && Array.isArray(reply.result)) ? reply.result : []), found = {};
 	list.forEach(function(m) {
 		if (!m || typeof m.mount !== 'string' || !(m.size > 0)) return;
 		if (!found[m.mount]) found[m.mount] = m;
@@ -117,7 +117,7 @@ function storageFromMounts(reply) {
 
 function fillStorage(info) {
 	if (info.root && info.tmp) return Promise.resolve(info);
-	return L.resolveDefault(callMounts(), {}).then(function(reply) {
+	return L.resolveDefault(callMounts(), []).then(function(reply) {
 		var st = storageFromMounts(reply);
 		if (!info.root && st.root) info.root = st.root;
 		if (!info.tmp && st.tmp) info.tmp = st.tmp;
