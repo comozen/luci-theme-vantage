@@ -77,12 +77,12 @@ msgstr "任意数据包"
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1263
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1267
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1533
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:84
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:85
 msgctxt "vantage-theme"
 msgid "Appearance"
 msgstr "外观"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:41
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:42
 msgid "Authorization Required"
 msgstr "需要授权"
 
@@ -101,7 +101,7 @@ msgctxt "vantage-theme"
 msgid "Back to the calling chain"
 msgstr "返回调用链"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:72
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:73
 msgctxt "vantage-theme"
 msgid "Breadcrumb"
 msgstr "面包屑"
@@ -204,7 +204,7 @@ msgid "Egress"
 msgstr "出口"
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:897
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:57
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:58
 msgid "Expand navigation"
 msgstr "展开导航"
 
@@ -254,7 +254,7 @@ msgstr "空闲"
 msgid "Grid packets"
 msgstr "网格数据包"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:52
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:53
 msgctxt "vantage-theme"
 msgid "Home"
 msgstr "首页"
@@ -287,7 +287,7 @@ msgctxt "vantage-theme"
 msgid "Input"
 msgstr "输入"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:45
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:46
 msgid "Invalid username and/or password! Please try again."
 msgstr "用户名或密码错误，请重试。"
 
@@ -306,12 +306,12 @@ msgid "Light"
 msgstr "浅色"
 
 #: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:23
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:57
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:58
 msgid "Log in"
 msgstr "登录"
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1269
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:87
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:88
 msgid "Log out"
 msgstr "退出登录"
 
@@ -320,7 +320,7 @@ msgstr "退出登录"
 msgid "Login background"
 msgstr "登录背景"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:51
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:52
 msgctxt "vantage-theme"
 msgid "Main navigation"
 msgstr "主导航"
@@ -402,7 +402,7 @@ msgctxt "vantage-theme"
 msgid "Packet path"
 msgstr "数据包路径"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:93
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:94
 msgid "Page tabs"
 msgstr "页面标签页"
 
@@ -416,7 +416,7 @@ msgctxt "vantage-theme"
 msgid "Passes unmatched"
 msgstr "放行未匹配流量"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:54
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:55
 msgid "Password"
 msgstr "密码"
 
@@ -466,8 +466,8 @@ msgid "Rules table"
 msgstr "规则表"
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1290
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:75
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:77
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:76
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:78
 msgid "Search pages"
 msgstr "搜索页面"
 
@@ -489,7 +489,7 @@ msgstr "显示完整描述"
 msgid "Show full help: %s"
 msgstr "显示完整帮助：%s"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:48
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:49
 msgid "Skip to content"
 msgstr "跳至正文"
 
@@ -547,7 +547,7 @@ msgstr "使用浅色主题"
 msgid "Used"
 msgstr "已用"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:50
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:51
 msgid "Username"
 msgstr "用户名"
 
