@@ -248,6 +248,18 @@ jobs:
           name: vantage-24.10.8
           path: qwrt
 
+      - name: Name the packages for QWRT
+        # the file name only: the control keeps Architecture: all, opkg
+        # never looks at it
+        run: |
+          set -euo pipefail
+          cd qwrt
+          for f in *_all.ipk; do
+            [ -e "$f" ] || continue
+            mv -- "$f" "${f%_all.ipk}_qwrt.ipk"
+          done
+          sha256sum -- *.ipk > SHA256SUMS
+
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
