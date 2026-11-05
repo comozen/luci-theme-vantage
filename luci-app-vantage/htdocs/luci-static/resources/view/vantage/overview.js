@@ -54,6 +54,8 @@ var callSwitchPorts = rpc.declare({ object: 'luci', method: 'getSwconfigPortStat
 var callHints = rpc.declare({ object: 'luci-rpc', method: 'getHostHints', expect: { '': {} } });
 var callIwInfo = rpc.declare({ object: 'iwinfo', method: 'info', params: [ 'device' ], expect: { '': {} } });
 var callAssoc = rpc.declare({ object: 'iwinfo', method: 'assoclist', params: [ 'device' ], expect: { results: [] } });
+/* QSDK's iwinfo reports zero counters: ask the vendor tool for the bytes */
+var callCounters = rpc.declare({ object: 'luci.vantage', method: 'counters', params: [ 'device', 'macs' ], expect: { results: [] } });
 var callRrdns = rpc.declare({ object: 'network.rrdns', method: 'lookup', params: [ 'addrs', 'timeout', 'limit' ], expect: { '': {} } });
 var callMdns = rpc.declare({ object: 'umdns', method: 'hosts' });
 var callUciGet = rpc.declare({ object: 'uci', method: 'get', params: [ 'config' ], expect: { values: {} } });
@@ -95,6 +97,36 @@ var VANTAGE_MEDIA = /(^|[/])vantage[/]*$/;
 function vantageTheme() {
 	var media = L.env.media || '';
 	return VANTAGE_MEDIA.test(media);
+}
+
+/* iwinfo's assoclist carries no byte counters on QSDK: ask the plugin for
+   them and put them where the model expects them, leaving the rest alone */
+function fillCounters(ifnames, assoc) {
+	var ask = [];
+	ifnames.forEach(function(ifn) {
+		var macs = [];
+		(Array.isArray(assoc[ifn]) ? assoc[ifn] : []).forEach(function(s) {
+			if (s && typeof s.mac === 'string' && !(s.rx && s.rx.bytes) && !(s.tx && s.tx.bytes)) macs.push(s.mac);
+		});
+		if (macs.length) ask.push([ ifn, macs.slice(0, 64) ]);
+	});
+	if (!ask.length) return Promise.resolve();
+	return Promise.all(ask.map(function(a) {
+		return L.resolveDefault(callCounters(a[0], a[1]), []).then(function(list) {
+			(Array.isArray(list) ? list : []).forEach(function(c) {
+				if (!c || typeof c.mac !== 'string') return;
+				var mac = c.mac.toLowerCase();
+				(Array.isArray(assoc[a[0]]) ? assoc[a[0]] : []).forEach(function(s) {
+					if (!s || String(s.mac).toLowerCase() !== mac) return;
+					s.rx = s.rx || {}; s.tx = s.tx || {};
+					if (typeof c.rxBytes === 'number') s.rx.bytes = c.rxBytes;
+					if (typeof c.txBytes === 'number') s.tx.bytes = c.txBytes;
+					if (typeof c.rxPackets === 'number') s.rx.packets = c.rxPackets;
+					if (typeof c.txPackets === 'number') s.tx.packets = c.txPackets;
+				});
+			});
+		});
+	})).then(function() {});
 }
 
 /* ------------------------------------------------------------- SVG kit */
@@ -667,9 +699,11 @@ return view.extend({
 				});
 				var switchState = Object.create(null);
 				Object.keys(swState).forEach(function(n) { switchState[n] = swState[n].ports; });
-				return { info: r[0] || {}, stat: r[1] || '', ifaces: r[2] || [], devs: r[3] || {}, wifi: wifiDevs, hints: r[5] || {}, thermal: r[6] || [],
-					fdb: Array.isArray(wiredReply.hosts) ? wiredReply.hosts : [], fdbCrowded: wiredReply.crowded === true, switches: switches, switchState: switchState,
-					assoc: assoc, hapd: hapd, hapdStatus: hapdStatus, iwinfo: iwinfo, at: Date.now(), started: started };
+				return fillCounters(ifnames, assoc).then(function() {
+					return { info: r[0] || {}, stat: r[1] || '', ifaces: r[2] || [], devs: r[3] || {}, wifi: wifiDevs, hints: r[5] || {}, thermal: r[6] || [],
+						fdb: Array.isArray(wiredReply.hosts) ? wiredReply.hosts : [], fdbCrowded: wiredReply.crowded === true, switches: switches, switchState: switchState,
+						assoc: assoc, hapd: hapd, hapdStatus: hapdStatus, iwinfo: iwinfo, at: Date.now(), started: started };
+				});
 			});
 		});
 	},
