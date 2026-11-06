@@ -282,6 +282,10 @@ test('header: the contract hooks and script order are in place', () => {
 	const srcs = tokenize(html).tags.filter(t => t.name === 'script' && !t.close).map(t => (t.attrs.find(a => a[0] === 'src') || [])[1]).filter(Boolean);
 	assert.deepEqual(srcs, [ '/cgi-bin/luci/admin/translations/en', '/luci-static/resources/cbi.js',
 		'/luci-static/vantage/subscribe-autosize.js' ], 'translations, then cbi.js (before core luci.js), then the page helper');
+	/* the OpenClash stylesheet is per page: not on this one, and on that one */
+	assert.ok(!html.includes('qwrt-openclash.css'), 'no OpenClash stylesheet elsewhere');
+	const oc = renderPage({ authed: true, path: [ 'admin', 'services', 'openclash', 'config' ] }).html;
+	assert.ok(oc.includes('/luci-static/vantage/qwrt-openclash.css'), 'OpenClash pages get their stylesheet');
 	assert.ok(html.indexOf('id="maincontent"') > 0 && !/<\/main>[\s\S]*<div id="view">/.test(html), '#view lands inside #maincontent');
 	assert.ok(!/id="view"/.test(engine.render(THEME + '/header', environment({ authed: true, path: ADMIN }).env, { blank_page: false })), 'the theme never emits #view');
 	/* SubstituteVersion (luci.mk) adds ?v= only to "{{ media }}/x.css" / "{{ resource }}/x.js" */
