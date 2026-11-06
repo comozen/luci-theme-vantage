@@ -454,3 +454,63 @@ body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-t
 @media(max-width:720px) {
  body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-text-center { grid-template-columns:72px minmax(0,1fr) auto; }
 }
+
+/* ==========================================================================
+   Log pages (system, kernel) and a floor under the smallest text, from the
+   Xocen layer. The filter bar there is a flat run of labels and controls;
+   the grid gives the second pair the same columns as the first.
+   ========================================================================== */
+
+#content_syslog > div[style*="margin-bottom"] {
+	display: grid !important;
+	grid-template-columns: max-content max-content max-content minmax(9em, 1fr) !important;
+	align-items: center !important;
+	column-gap: 10px !important;
+	row-gap: 8px !important;
+	margin-bottom: 12px !important;
+}
+
+#content_syslog > div[style*="margin-bottom"] > label {
+	margin: 0 !important;
+	font-size: .92em;
+	color: var(--text-2);
+	white-space: nowrap;
+}
+
+#content_syslog > div[style*="margin-bottom"] > input[type="checkbox"] {
+	margin: 0 !important;
+	width: 18px;
+	height: 18px;
+	accent-color: var(--accent);
+}
+
+#content_syslog > div[style*="margin-bottom"] > :is(select, input:not([type="checkbox"])) {
+	margin: 0 !important;
+	min-width: 0;
+	width: 100%;
+}
+
+@media (max-width: 720px) {
+	#content_syslog > div[style*="margin-bottom"] {
+		grid-template-columns: max-content minmax(0, 1fr) !important;
+	}
+}
+
+/* Interface labels and port arrows came out at 10.5 and 9.6 px: below 12
+   nothing here is meant to be read. */
+body .label,
+body span.label,
+body .ifacebox .label,
+body .vt-port-dir,
+body .ifacebox strong,
+body .ifacebox b,
+body .ifacebox small,
+body small,
+body .cbi-value-description small {
+	font-size: 12px !important;
+	line-height: 1.45;
+}
+
+body :is(code, kbd, .v-nft-link, .v-nft-endpoint, .v-nft-rule) {
+	font-size: 12px !important;
+}
