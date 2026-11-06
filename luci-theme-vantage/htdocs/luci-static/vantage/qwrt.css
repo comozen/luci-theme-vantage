@@ -2,7 +2,8 @@
    form geometry and the expanded rail. Additive only: every rule here
    overrides nothing upstream already gets right; loaded after
    vantage.css, so it wins where both match.
-   Taken from the QWRT 1.0.10-r2 build and carried forward unchanged. */
+   The SFP and form rules come from the QWRT 1.0.10-r2 build; the
+   OpenClash block at the end is the Xocen layer of 2026-10-30. */
 
 /* QWRT: live SFP table inside horizontal scroller must not use sticky headings. */
 body[data-page="admin-status-sfp-info"] #view .table .th {
@@ -453,3 +454,1602 @@ body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-t
 @media(max-width:720px) {
  body[data-page^="admin-services-openclash"] .vt-main fieldset.diag-style > .oc-text-center { grid-template-columns:72px minmax(0,1fr) auto; }
 }
+
+
+/* ==========================================================================
+   OpenClash, Xocen layer of 2026-10-30. Every rule is scoped to
+   admin-services-openclash, so none of it can reach another page.
+   ========================================================================== */
+
+@media (max-width:500px) {
+	body[data-page^="admin-services-openclash"] .ac-head {
+		flex-wrap:wrap !important;
+		align-items:center !important;
+		row-gap:8px !important;
+	}
+	body[data-page^="admin-services-openclash"] .ac-tools {
+		max-width:100% !important;
+		flex-wrap:wrap !important;
+		gap:4px !important;
+	}
+	body[data-page^="admin-services-openclash"] .ac-dir-opt, body[data-page^="admin-services-openclash"] .ac-key-btn {
+		box-sizing:border-box !important;
+		min-width:36px !important;
+		width:36px !important;
+		min-height:36px !important;
+		height:36px !important;
+		padding:0 !important;
+		display:inline-flex !important;
+		align-items:center !important;
+		justify-content:center !important;
+	}
+}
+@media (max-width:720px) {
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers .dom-openclash-dns_servers {
+		overflow-x:visible !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers table.oc-tbl, body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers table.oc-tbl > tbody {
+		display:block !important;
+		width:100% !important;
+		min-width:0 !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-head {
+		display:none !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row {
+		display:grid !important;
+		grid-template-columns:repeat(2,minmax(0,1fr));
+		gap:12px;
+		padding:14px !important;
+		margin:0 0 12px;
+		border:1px solid var(--line) !important;
+		border-radius:10px;
+		box-sizing:border-box;
+		width:100% !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td {
+		display:block !important;
+		min-width:0 !important;
+		max-width:none !important;
+		width:auto !important;
+		padding:0 !important;
+		border:0 !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td[data-title]::before {
+		content:attr(data-title) !important;
+		display:block !important;
+		margin:0 0 5px;
+		font-size:12px;
+		color:var(--text) !important;
+		opacity:.75;
+		text-align:left !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td.vt-num {
+		grid-column:1 / -1;
+		text-align:left !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td[data-name="ip"] {
+		grid-column:1 / -1;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td[data-title] > div, body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td[data-title] > div > div:not(.cbi-checkbox) {
+		width:100% !important;
+		max-width:none !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row input.cbi-input-text, body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row select {
+		box-sizing:border-box;
+		width:100% !important;
+		max-width:100% !important;
+		min-width:0 !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td.oc-cell:not(.vt-num) {
+		display:flex !important;
+		align-items:center;
+		flex-wrap:wrap;
+		gap:6px;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td.oc-cell:not(.vt-num)::before {
+		display:block !important;
+		flex:0 0 100%;
+		font-size:12px;
+		text-align:left;
+		color:var(--text);
+		opacity:.75;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td.oc-cell:nth-last-child(2)::before {
+		content:"排序" !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td.oc-cell:last-child::before {
+		content:"操作" !important;
+	}
+	body[data-page="admin-services-openclash-config-overwrite"] #cbi-openclash-dns_servers tr.oc-tbl-row > td.oc-cell:not(.vt-num) input {
+		margin:0 !important;
+		min-width:0 !important;
+		max-width:64px !important;
+		flex:1 1 42px;
+	}
+	body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) {
+		grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+	}
+}
+	body[data-page="admin-services-openclash-config"] .vt-main .config-editor-header {
+		box-sizing:border-box;
+		width:100% !important;
+		max-width:none !important;
+		min-height:42px;
+		display:flex !important;
+		align-items:center;
+		justify-content:center;
+		padding:8px 12px !important;
+		text-align:center;
+		border-radius:8px;
+	}
+	body[data-page="admin-services-openclash-config"] .vt-main .upload-note {
+		max-width:100%;
+		padding:8px 12px;
+		margin-top:8px;
+		text-align:center;
+	}
+	body[data-page="admin-services-openclash-config"] .vt-main .upload-note-default {
+		color:var(--text-2) !important;
+		font-size:var(--fs-base,13px) !important;
+		line-height:1.5;
+		overflow-wrap:anywhere;
+	}
+	body[data-page="admin-services-openclash-config"] .vt-main .progress_bar_bg {
+		width:260px;
+		max-width:100%;
+		min-height:38px;
+		border-radius:8px;
+		overflow:hidden;
+	}
+	body[data-page="admin-services-openclash-config"] .vt-main .progress_bar_text {
+		font-size:12px !important;
+		line-height:1.3;
+		color:var(--text) !important;
+		text-shadow:none;
+		white-space:normal;
+		display:flex;
+		flex-direction:column;
+		justify-content:center;
+	}
+	body[data-page="admin-services-openclash-config"] .vt-main .progress_bar_text .text_show {
+		white-space:normal;
+		overflow-wrap:anywhere;
+		line-height:1.3;
+	}
+	html body[data-page="admin-services-openclash-log"] .vt-main :is(.cm-editor,.cm-scroller,.cm-content,.cm-line,.cm-gutters,.cm-gutterElement) {
+		font-family:var(--mono) !important;
+		font-size:var(--fs-sm,12px) !important;
+		line-height:18px !important;
+	}
+	body[data-page="admin-services-openclash-config"] .vt-main .progress_bar_text .text_show {
+		font-size:11px !important;
+		line-height:1.2 !important;
+	}
+	body[data-page^="admin-services-openclash"] .vt-main .oc {
+		font-family:var(--font);
+		font-size:var(--fs-base,13px) !important;
+	}
+	body[data-page^="admin-services-openclash"] .vt-main :is( .oc p,.oc label,.oc input,.oc select,.oc textarea,.oc button, .oc .td,.oc .th,.oc td,.oc th,.oc .cbi-value-title,.oc .cbi-value-description, .oc .form-group label,.oc .form-checkbox,.oc .mode-tab,.oc .config-editor-loading, .oc .footer-btn,.oc .dashboard-btn,.oc .form-select,.oc .form-input, .oc .form-file,.oc .config-editor-status,.oc .config-editor-help, .oc .radio-button label, .oc.cbi-button.cbi-button) {
+		font-size:var(--fs-base,13px) !important;
+	}
+	body[data-page^="admin-services-openclash"] .vt-main .oc h2 {
+		font-size:var(--fs-xl,20px) !important;
+	}
+	body[data-page^="admin-services-openclash"] .vt-main :is(.oc h3,.oc h4,.oc .config-editor-title,.oc .config-file-name) {
+		font-size:var(--fs-md,14px) !important;
+	}
+	body[data-page^="admin-services-openclash"] .vt-main :is( textarea.oc-input-textarea,.oc #debug-rendered,.oc .oc-oplog-body) {
+		font-family:var(--mono) !important;
+		font-size:var(--fs-sm,12px) !important;
+		line-height:1.5 !important;
+	}
+	body[data-page^="admin-services-openclash"] .vt-main #debug-rendered :is(p,li,td,th,code,pre,span,div) {
+		font-size:inherit !important;
+	}
+	body[data-page^="admin-services-openclash"] .vt-main .oc {
+		--card-title-size:var(--fs-md,14px);
+		--card-title-size-sm:var(--fs-base,13px);
+	}
+	body[data-page^="admin-services-openclash"] .vt-main :is( .oc .card-value,.oc .version-display,.oc .cbi-button-option,.oc .stat-label, .oc .stat-value,.oc .stat-num,.oc .subscription-info-text, .oc .config-file-empty-message,.oc .file-info,.oc .file-info-item, .oc .mode-label,.oc .myip-latency,.oc .myip-ip-addr,.oc .myip-ip-geo, .oc .card .general .oix-result,.oc .card .general .oix-result2) {
+		font-size:var(--fs-base,13px) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc textarea.oc-input-textarea, html body[data-page^="admin-services-openclash"] .vt-main .oc #debug-rendered, html body[data-page^="admin-services-openclash"] .vt-main .oc .oc-oplog-body {
+		font-family:var(--mono) !important;
+		font-size:var(--fs-sm,12px) !important;
+		line-height:20px !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(textarea.oc-input-textarea,#core_log,#debug_log,#debug-rendered) {
+		font-family:var(--mono) !important;
+		font-size:var(--fs-sm,12px) !important;
+		line-height:18px !important;
+	}
+	html body[data-page^="admin-services-openclash"] tr.cbi-section-table-row:has(input.cbi-button-apply) {
+		grid-template-columns: none !important;
+		grid-auto-flow: column !important;
+		grid-auto-columns: max-content !important;
+		justify-content: end !important;
+		align-items: center !important;
+		gap: 10px !important;
+	}
+	html body[data-page^="admin-services-openclash"] tr.cbi-section-table-row:has(input.cbi-button-apply) > .td {
+		width: auto !important;
+		flex: 0 0 auto !important;
+	}
+	html body[data-page^="admin-services-openclash"] td.cbi-value-field:has(> div > input.cbi-button-apply) > div {
+		width: auto !important;
+		max-width: 260px !important;
+		display: inline-flex !important;
+	}
+	html body[data-page^="admin-services-openclash"] p.oc-text-center:has(> .oc-switch-mode-btn) {
+		display: block !important;
+		width: auto !important;
+		max-width: 280px !important;
+		margin-left: auto !important;
+		margin-right: auto !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-section-table .td input.cbi-input-text, html body[data-page^="admin-services-openclash"] .cbi-section-table .td input.cbi-input, html body[data-page^="admin-services-openclash"] .cbi-section-table .td select.cbi-input-select {
+		min-width: 5.4em;
+		box-sizing: border-box;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-section-table .td .cbi-button {
+		min-width: 0;
+		width: auto;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-section-table-row > .td:last-child {
+		padding-right: 10px !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-section-table .th, html body[data-page^="admin-services-openclash"] .cbi-section-table .td {
+		padding-left: 8px !important;
+		padding-right: 8px !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-section-table .td input.cbi-input-text, html body[data-page^="admin-services-openclash"] .cbi-section-table .td input.cbi-input {
+		min-width: 8em !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-section-table .td .cbi-dropdown, html body[data-page^="admin-services-openclash"] .cbi-section-table .td select.cbi-input-select {
+		width: auto !important;
+		min-width: 5.6em;
+		max-width: 100%;
+	}
+	html body[data-page^="admin-services-openclash"] [class^="ac-"], html body[data-page^="admin-services-openclash"] [class*=" ac-"], html body[data-page^="admin-services-openclash"] .logo-text, html body[data-page^="admin-services-openclash"] .developer-label, html body[data-page^="admin-services-openclash"] .btn-text, html body[data-page^="admin-services-openclash"] .version-display {
+		font-size: 12px !important;
+	}
+	html body[data-page^="admin-services-openclash"] .card-title, html body[data-page^="admin-services-openclash"] .oc .cbi-section h3 {
+		font-size: 14px !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection {
+		overflow-x: auto !important;
+		overflow-y: hidden;
+		scrollbar-width: thin;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection:has(.cbi-dropdown[open]) {
+		overflow: visible !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection::-webkit-scrollbar {
+		height: 8px;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection::-webkit-scrollbar-thumb {
+		background: var(--line-2);
+		border-radius: 4px;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table {
+		table-layout: auto !important;
+		width: auto !important;
+		min-width: 100% !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td input, html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td select, html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td .cbi-dropdown {
+		min-width: 5.6em !important;
+		box-sizing: border-box;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td input[type="button"], html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td input[type="submit"] {
+		min-width: 0 !important;
+		width: auto !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td input[type="checkbox"], html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td input[type="radio"] {
+		min-width: 0 !important;
+		max-width: none !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .tr > .td:nth-child(4) input, html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table tr > .td:nth-child(4) input, html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .tr > *:nth-child(4) input {
+		min-width: 9.7em !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td:last-child {
+		white-space: nowrap !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .tr > .td:nth-child(2), html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table tr > .td:nth-child(2) {
+		width: 46px !important;
+		min-width: 46px !important;
+		padding-left: 6px !important;
+		padding-right: 6px !important;
+		text-align: center !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .tr > .td:nth-child(4) input, html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table tr > .td:nth-child(4) input {
+		min-width: 10.4em !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .tr > .td:nth-child(10) :is(input, select, .cbi-dropdown), html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table tr > .td:nth-child(10) :is(input, select, .cbi-dropdown) {
+		min-width: 7.2em !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td:last-child .cbi-button {
+		min-width: 46px !important;
+		padding-left: 8px !important;
+		padding-right: 8px !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td:nth-child(2) {
+		text-align: center !important;
+		vertical-align: middle !important;
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td:nth-child(2) > div {
+		display: flex !important;
+		justify-content: center !important;
+		align-items: center !important;
+		width: 100% !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-tblsection .cbi-section-table .td:nth-child(2) .cbi-checkbox input {
+		aspect-ratio: 1 / 1 !important;
+		flex: 0 0 auto !important;
+		margin: 0 !important;
+	}
+	html body[data-page^="admin-services-openclash-config-subscribe-edit"] .vt-main .cbi-value[id$="-convert_address"] > .cbi-value-field > .cbi-value-description {
+		display:block !important;
+		max-height:none !important;
+		max-width:100%;
+		-webkit-line-clamp:unset !important;
+		line-clamp:unset !important;
+		overflow:visible !important;
+	}
+	html body[data-page^="admin-services-openclash-config-subscribe-edit"] .vt-main .cbi-value[id$="-convert_address"] > .vt-help {
+		display:none !important;
+	}
+	html body[data-page^="admin-services-openclash-config-subscribe-edit"] .vt-main .cbi-value[id$="-convert_address"] > .cbi-value-title {
+		padding-right:0;
+	}
+	html body[data-page^="admin-services-openclash-config-subscribe-edit"] .vt-main .cbi-value[id$="-convert_address"] :is(.subconverter-version-status,.oc-warn-strip) {
+		min-width:0;
+		max-width:100%;
+		white-space:normal;
+		overflow-wrap:anywhere;
+	}
+	html body[data-page^="admin-services-openclash-config-subscribe-edit"] .vt-main .oc-cbi-table .tr:has(input[id$=".Commit"]):has(input[id$=".Back"]) {
+		display:grid !important;
+		grid-template-columns:repeat(2,minmax(0,1fr));
+		gap:10px;
+		padding:12px !important;
+		background:transparent !important;
+	}
+	html body[data-page^="admin-services-openclash-config-subscribe-edit"] .vt-main .oc-cbi-table .tr:has(input[id$=".Commit"]):has(input[id$=".Back"]) > .td {
+		display:block !important;
+		padding:0 !important;
+		width:auto !important;
+		min-width:0 !important;
+	}
+	html body[data-page^="admin-services-openclash-config-subscribe-edit"] .vt-main .oc-cbi-table .tr:has(input[id$=".Commit"]):has(input[id$=".Back"]) input.cbi-button {
+		width:100% !important;
+		max-width:none !important;
+		margin:0 !important;
+	}
+	html body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) input.dashboard-btn {
+		box-sizing: border-box !important;
+		height: var(--oc-dashboard-button-height, 42px) !important;
+		min-height: var(--oc-dashboard-button-height, 42px) !important;
+		max-height: var(--oc-dashboard-button-height, 42px) !important;
+		line-height: 1.2 !important;
+		padding: 2px !important;
+		font-size: var(--oc-dashboard-button-font, 12px) !important;
+		background: var(--s2) !important;
+		color: var(--text) !important;
+		border: 1px solid var(--line-2) !important;
+		border-radius: var(--r-lg) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) input.dashboard-btn:hover {
+		background: var(--s3) !important;
+		border-color: var(--text-3) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) > button.dashboard-btn:not(.hidden):not(:has(> input.dashboard-btn)) {
+		height: var(--oc-dashboard-button-height, 42px) !important;
+		min-height: var(--oc-dashboard-button-height, 42px) !important;
+		max-height: var(--oc-dashboard-button-height, 42px) !important;
+		line-height: 1.2 !important;
+		padding: 2px !important;
+		font-size: var(--oc-dashboard-button-font, 12px) !important;
+		background: var(--s2) !important;
+		color: var(--text) !important;
+		border: 1px solid var(--line-2) !important;
+		border-radius: var(--r-lg) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .oc .dashboard-btn.hidden {
+		display: none !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe > .cbi-section-table {
+		table-layout: fixed !important;
+		width: 100% !important;
+		min-width: 0 !important;
+		border-collapse: separate !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe > .cbi-section-table > tbody > .tr > :is(.th,.td):nth-child(1) {
+		width: 9% !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe > .cbi-section-table > tbody > .tr > :is(.th,.td):nth-child(2) {
+		width: 35% !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe > .cbi-section-table > tbody > .tr > :is(.th,.td):nth-child(3) {
+		width: 23% !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe > .cbi-section-table > tbody > .tr > :is(.th,.td):nth-child(4) {
+		width: 13% !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe > .cbi-section-table > tbody > .tr > :is(.th,.td):nth-child(5) {
+		width: 8% !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe > .cbi-section-table > tbody > .tr > :is(.th,.td):nth-child(6) {
+		width: 12% !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table > tbody > .tr > :is(.td,.th) {
+		box-sizing: border-box !important;
+		min-width: 0 !important;
+		padding: 8px 10px !important;
+		vertical-align: middle !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table .td > div:not([class]) {
+		display: flex !important;
+		align-items: center !important;
+		flex-wrap: wrap !important;
+		box-sizing: border-box !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		min-height: 0 !important;
+		margin: 0 !important;
+		padding: 0 !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table .td > div.vt-acts {
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		flex-wrap: nowrap !important;
+		gap: 6px !important;
+		min-height: 0 !important;
+		margin: 0 !important;
+		padding: 0 !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table > tbody > .tr > .td:nth-child(5) > div:not([class]) {
+		justify-content: center !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .td[data-name="address"][data-widget="tvalue"] textarea {
+		display: block !important;
+		flex: 1 1 auto !important;
+		min-width: 0 !important;
+		box-sizing: border-box !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		margin: 0 !important;
+		height: 54px !important;
+		min-height: 54px !important;
+		max-height: 54px !important;
+		padding: 7px 10px !important;
+		font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
+		font-size: 12px !important;
+		line-height: 19px !important;
+		white-space: pre-wrap !important;
+		word-break: break-all !important;
+		overflow: hidden !important;
+		resize: none !important;
+		background: var(--s2) !important;
+		border: 1px solid var(--line-2) !important;
+		border-radius: 6px !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table .td[data-widget="dvalue"] {
+		overflow: hidden !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table .td[data-widget="dvalue"] > div {
+		overflow: hidden !important;
+		text-overflow: ellipsis !important;
+		white-space: nowrap !important;
+		line-height: 20px !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table > tbody > .tr > .th {
+		background: var(--s3) !important;
+		color: var(--text-3) !important;
+		font-size: 12px !important;
+		font-weight: 600 !important;
+		border-bottom: 1px solid var(--line-2) !important;
+		padding: 11px 10px !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table > tbody > .tr.cbi-section-table-row > .td {
+		border-bottom: 1px solid var(--line) !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table > tbody > .tr.cbi-section-table-row:hover > .td {
+		background: var(--s3) !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table .cbi-button {
+		box-sizing: border-box !important;
+		height: 32px !important;
+		min-height: 32px !important;
+		padding: 0 10px !important;
+		font-size: 12px !important;
+		border-radius: var(--r-lg) !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table :is(.cbi-input-reload, .cbi-button-edit) {
+		background: var(--accent-soft) !important;
+		color: var(--accent-text) !important;
+		border: 1px solid var(--accent-line) !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table :is(.cbi-input-reload, .cbi-button-edit):hover {
+		background: var(--accent) !important;
+		color: var(--accent-ink) !important;
+		border-color: var(--accent) !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table > tbody > .tr > :is(.td,.th):nth-child(5), html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table > tbody > .tr > :is(.td,.th):nth-child(6) {
+		text-align: center !important;
+		padding-left: 4px !important;
+		padding-right: 4px !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-button-add {
+		box-sizing: border-box !important;
+		height: 34px !important;
+		min-height: 34px !important;
+		min-width: 88px !important;
+		padding: 0 18px !important;
+		background: transparent !important;
+		color: var(--accent-text) !important;
+		border: 1px solid var(--accent-line) !important;
+		border-radius: var(--r-lg) !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-button-add:hover {
+		background: var(--accent-soft) !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-table-table {
+		padding: 10px 14px !important;
+		margin-top: 10px !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-table-table .cbi-button {
+		box-sizing: border-box !important;
+		height: 36px !important;
+		min-height: 36px !important;
+		padding: 0 20px !important;
+		font-size: 12px !important;
+		border-radius: var(--r-lg) !important;
+	}
+@media (max-width: 720px) {
+	html body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) {
+		display: grid !important;
+		grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) input.dashboard-btn, html body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) > button.dashboard-btn:not(.hidden):not(:has(> input.dashboard-btn)) {
+		width: 100% !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe, html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .cbi-section-table {
+		overflow: visible !important;
+		width: 100% !important;
+		min-width: 0 !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td::before {
+		display: block !important;
+		margin-bottom: 4px;
+		text-align: left !important;
+		color: var(--text-3);
+		font-size: var(--fs-micro);
+		font-weight: 600;
+		letter-spacing: .08em;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(1)::before {
+		content: "配置文件名" !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(2)::before {
+		content: "订阅地址" !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(3)::before {
+		content: "订阅转换模板" !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(4)::before {
+		content: "自动更新" !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(5)::before {
+		content: "更新" !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(6)::before {
+		content: "操作" !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(1) {
+		font-weight: 600;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .td[data-name="address"][data-widget="tvalue"] textarea {
+		height: auto !important;
+		min-height: 54px !important;
+		max-height: none !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(5), html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(6) {
+		flex-basis: 50% !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .tr > .td:nth-child(5) .cbi-button {
+		width: 46px !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .td.cbi-section-actions > .vt-acts {
+		display: flex !important;
+		flex-wrap: nowrap !important;
+		gap: 6px !important;
+		width: 100% !important;
+	}
+	html body[data-page^="admin-services-openclash"] #cbi-openclash-config_subscribe .td.cbi-section-actions .vt-acts > :is(.cbi-button, .vt-acts-more) {
+		flex: 1 1 0 !important;
+		min-width: 0 !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cbi-page-actions {
+		position: static !important;
+		bottom: auto !important;
+		margin: 12px 0 0 auto !important;
+	}
+}
+@media (max-width: 768px) {
+	html body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) {
+		--oc-dashboard-button-height: 40px;
+		--oc-dashboard-button-font: 10px;
+	}
+}
+@media (max-width: 480px) {
+	html body[data-page^="admin-services-openclash"] .oc :is(.dashboard-buttons,.quick-actions-buttons) {
+		--oc-dashboard-button-height: 25px;
+		--oc-dashboard-button-font: 9px;
+	}
+}
+	html[data-darkmode] body[data-page^="admin-services-openclash"] .oc {
+		--info-color: var(--v-chart-1);
+		--violet: var(--v-chart-5);
+		--success-color: var(--ok);
+		--success-dark: var(--ok-text);
+		--success-a5: var(--ok-soft);
+		--success-a10: var(--ok-soft);
+		--success-a20: color-mix(in srgb, var(--ok) 20%, transparent);
+		--success-a50: color-mix(in srgb, var(--ok) 50%, transparent);
+		--error-color: var(--err);
+		--error-a10: var(--err-soft);
+		--error-a12: var(--err-soft);
+		--error-a18: color-mix(in srgb, var(--err) 18%, transparent);
+		--error-a20: color-mix(in srgb, var(--err) 20%, transparent);
+		--error-a50: color-mix(in srgb, var(--err) 50%, transparent);
+		--tip-color: var(--warn);
+		--warning-color: var(--warn);
+		--warning-a10: var(--warn-soft);
+		--overlay-bg: var(--scrim);
+		--divider: var(--line);
+		--switch-knob-bg: var(--s2);
+		--scrollbar-thumb: var(--line-2);
+		--scrollbar-thumb-hover: var(--text-3);
+	}
+	html body:is([data-page="admin-services-openclash-config"],[data-page="admin-services-openclash-config-subscribe"]) .vt-main :is(#cbi-table-table:has(.oc-actions-menu),#cbi-openclash-config_subscribe) > table.cbi-section-table {
+		width: 100% !important;
+		min-width: 0 !important;
+		margin-inline: 0 !important;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table:has(.oc-actions-menu) td[data-name="state"] :is(.oc-status-ok,.oc-status-err) {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		width: max-content;
+		max-width: 100%;
+		box-sizing: border-box;
+		padding: 3px 8px;
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		background: var(--s3);
+		color: var(--text-2) !important;
+		font-size: var(--fs-sm, 12px) !important;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table:has(.oc-actions-menu) td[data-name="state"] .oc-status-ok {
+		background: var(--ok-soft);
+		border-color: color-mix(in srgb, var(--ok) 32%, var(--line));
+		color: var(--ok-text) !important;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table td[data-name="state"] :is(.oc-status-ok,.oc-status-err)::before {
+		content: "";
+		width: 5px;
+		height: 5px;
+		flex: none;
+		border-radius: 50%;
+		background: currentColor;
+	}
+	html body[data-page="admin-services-openclash-config-subscribe"] .vt-main #cbi-openclash-config_subscribe tr.cbi-section-table-row > td:first-child {
+		font-weight: 600;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table td[data-name="apply"] > div:has(> .oc-actions-menu), html body[data-page="admin-services-openclash-config-subscribe"] .vt-main #cbi-openclash-config_subscribe td.cbi-section-actions > .vt-acts {
+		display: flex !important;
+		align-items: center;
+		justify-content: flex-end !important;
+		flex-wrap: wrap !important;
+		gap: 6px !important;
+		width: 100% !important;
+		max-width: 100%;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table td[data-name="apply"] .cbi-button, html body[data-page="admin-services-openclash-config-subscribe"] .vt-main #cbi-openclash-config_subscribe td.cbi-section-actions > .vt-acts > :is(.cbi-button,.vt-acts-more) {
+		flex: 0 0 auto !important;
+		box-sizing: border-box;
+		height: 32px !important;
+		min-height: 32px !important;
+		padding: 0 10px !important;
+		margin: 0 !important;
+		border: 1px solid var(--line-2) !important;
+		border-radius: var(--r-lg) !important;
+		background: var(--s2) !important;
+		color: var(--text-2) !important;
+		font-size: 12px !important;
+		line-height: 30px !important;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table td[data-name="apply"] .oc-actions-menu-btn, html body[data-page="admin-services-openclash-config-subscribe"] .vt-main #cbi-openclash-config_subscribe td.cbi-section-actions > .vt-acts > .vt-acts-more {
+		width: 32px !important;
+		min-width: 32px !important;
+		padding: 0 !important;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table td[data-name="apply"] .cbi-button:hover, html body[data-page="admin-services-openclash-config-subscribe"] .vt-main #cbi-openclash-config_subscribe td.cbi-section-actions > .vt-acts > :is(.cbi-button,.vt-acts-more):hover {
+		background: var(--accent-soft) !important;
+		border-color: var(--accent-line) !important;
+		color: var(--accent-text) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc #stats-view-ac .ac-tools {
+		gap: 5px !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc #stats-view-ac .ac-dir-pill {
+		background: var(--s3);
+		border-color: var(--line);
+		border-radius: 8px;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc #stats-view-ac .ac-tools :is(.ac-dir-opt,.ac-key-btn) {
+		box-sizing: border-box !important;
+		justify-content: center;
+		min-width: 30px !important;
+		width: auto !important;
+		min-height: 30px !important;
+		height: 30px !important;
+		padding: 0 6px !important;
+		border-radius: var(--r-lg) !important;
+		color: var(--text-2);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc #stats-view-ac .ac-tools .ac-key-btn {
+		background: var(--s2);
+		border-color: var(--line);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc #stats-view-ac .ac-tools .ac-dir-opt.active, html body[data-page^="admin-services-openclash"] .vt-main .oc #stats-view-ac .ac-tools :is(.ac-dir-opt,.ac-key-btn):hover:not(:disabled) {
+		background: var(--accent-soft);
+		color: var(--accent-text);
+		box-shadow: none;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc #stats-view-ac .ac-tools :is(.ac-dir-opt,.ac-key-btn) svg {
+		width: 14px;
+		height: 14px;
+	}
+	html[data-darkmode] body[data-page^="admin-services-openclash"] .oc {
+		--radius-sm: var(--r-sm);
+		--radius-md: var(--r);
+		--radius-lg: var(--r-lg);
+		--shadow-md: var(--shadow-pop);
+	}
+	html body[data-page^="admin-services-openclash"] :is( .config-editor-model, .config-upload-model, .select-popup, .oc-confirm, .guide-pop ) {
+		box-sizing: border-box;
+		background: var(--s1);
+		color: var(--text);
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
+		box-shadow: var(--shadow-pop);
+	}
+	html body[data-page^="admin-services-openclash"] :is( .config-editor-header, .config-upload-header, .select-popup-header, .oc-oplog-h, .oc-sub-console-h ) {
+		background-color: var(--s3);
+		border-color: var(--line);
+		color: var(--text);
+	}
+	html body[data-page^="admin-services-openclash"] :is( .config-editor-footer, .config-upload-footer, .select-popup-status-bar, .select-popup-footer:not(.log-footer) ) {
+		background-color: var(--s3);
+		border-top: 1px solid var(--line);
+	}
+	html body[data-page^="admin-services-openclash"] .select-popup.select-popup-tab {
+		box-shadow: none;
+	}
+	html body[data-page^="admin-services-openclash"] .select-popup-header {
+		border-radius: var(--r) var(--r) 0 0;
+	}
+	html body[data-page^="admin-services-openclash"] :is( .config-editor-content, .oc-input-textarea, .oc-oplog-body, .oc-sub-console-b ) {
+		background-color: var(--s2);
+		color: var(--text);
+		border-color: var(--line-2);
+	}
+	html body[data-page^="admin-services-openclash"] :is( .version-card, .oix-setting-card, .oix-card, .oc-oplog, .oc-sub-console, .overwrite-config-dropdown-panel ) {
+		background-color: var(--s1);
+		border-color: var(--line);
+		border-radius: var(--r);
+	}
+	html body[data-page^="admin-services-openclash"] :is( .oc .form-input, .oc .form-select, .oc .form-textarea, .oc .select-class, .oc .oix-input, .oc-prompt-input ) {
+		box-sizing: border-box;
+		max-width: 100%;
+		border-radius: var(--r);
+	}
+	html body[data-page^="admin-services-openclash"] :is( .oc button, .oc input, .oc select, .oc textarea, .oc a ):focus-visible {
+		outline: 2px solid var(--focus);
+		outline-offset: 2px;
+	}
+	html body[data-page^="admin-services-openclash"] :is( :is(.config-editor-header, .config-upload-header) .icon-btn, .config-upload-footer .cancel-btn, .oc-confirm-btn:not(.oc-confirm-primary, .oc-confirm-danger), .log-footer .footer-btn:not(#gen_debug_button), #debug-rendered .pre-copy-btn ) {
+		background: var(--s2);
+		border: 1px solid var(--line-2);
+		border-radius: var(--r);
+		color: var(--text-2);
+		box-shadow: none;
+	}
+	html body[data-page^="admin-services-openclash"] :is( :is(.config-editor-header, .config-upload-header) .icon-btn, .config-upload-footer .cancel-btn, .oc-confirm-btn:not(.oc-confirm-primary, .oc-confirm-danger), .log-footer .footer-btn:not(#gen_debug_button), #debug-rendered .pre-copy-btn ):hover:not(:disabled) {
+		background: var(--accent-soft);
+		border-color: var(--accent-line);
+		color: var(--accent-text);
+	}
+	html body[data-page^="admin-services-openclash"] .log-footer #del_log_button:hover:not(:disabled) {
+		background: var(--err-soft);
+		border-color: var(--err);
+		color: var(--err-text);
+	}
+	html body[data-page^="admin-services-openclash"] .oc :is(.mode-tabs, .upload-mode-selector) {
+		background-color: var(--seg-bg);
+		border-color: var(--line);
+		border-radius: var(--r);
+	}
+	html body[data-page^="admin-services-openclash"] .oc .mode-tabs .mode-tab.active {
+		background: var(--seg-on);
+		color: var(--accent-text);
+		box-shadow: inset 0 0 0 1px var(--accent-line);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .oc #tab-header ul.oc-tabmenu {
+		box-sizing: border-box;
+		max-width: 100%;
+		gap: 4px;
+		padding: 3px;
+		background: var(--seg-bg);
+		border: 1px solid var(--line) !important;
+		border-radius: var(--r);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .oc #tab-header .oc-tabmenu > li {
+		background: transparent;
+		border-color: transparent;
+		box-shadow: none;
+		opacity: 1;
+		border-radius: var(--r-sm);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .oc #tab-header .oc-tabmenu > li > a {
+		color: var(--text-2) !important;
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .oc #tab-header .oc-tabmenu > .oc-tab {
+		background: var(--seg-on);
+		color: var(--accent-text);
+		box-shadow: inset 0 0 0 1px var(--accent-line);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .oc #tab-header .oc-tabmenu > .oc-tab > a {
+		color: var(--accent-text) !important;
+	}
+	html body[data-page="admin-services-openclash-log"] .oc .oc-input-textarea {
+		border: 1px solid var(--line-2);
+		border-radius: var(--r);
+	}
+	html body[data-page="admin-services-openclash-log"] .oc .log-footer {
+		justify-content: flex-end;
+		gap: 8px;
+	}
+	html body[data-page="admin-services-openclash-log"] .oc .log-footer .footer-btn {
+		flex: 0 1 auto;
+		width: auto;
+		height: var(--ctl-h);
+		min-height: var(--ctl-h);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .cm-editor {
+		box-shadow: 0 0 0 1px var(--line);
+		border-radius: var(--r);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .cm-editor .cm-gutters {
+		background-color: var(--s3);
+		border-color: var(--line);
+		color: var(--text-3);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .oc .radio-button {
+		background: var(--seg-bg);
+		border: 1px solid var(--line);
+		box-shadow: none;
+		gap: 4px;
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .oc .radio-button label {
+		background: transparent;
+		border-color: transparent;
+		color: var(--text-2);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .oc .radio-button label:hover, html[data-darkmode] body[data-page="admin-services-openclash-log"] .oc .radio-button input:checked + label {
+		background: var(--seg-on);
+		border-color: var(--accent-line);
+		color: var(--accent-text);
+		box-shadow: none;
+	}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe td[data-name="template"] > div {
+		white-space: normal !important;
+		overflow-wrap: anywhere;
+		line-height: 1.45 !important;
+	}
+@media (max-width: 600px) {
+	html body[data-page="admin-services-openclash-log"] .oc .log-footer .footer-btn {
+		flex: 1 1 calc(50% - 8px);
+		max-width: none;
+	}
+	html body[data-page^="admin-services-openclash"] :is( .config-editor-model, .config-upload-model ) {
+		min-width: 0;
+		max-width: calc(100vw - 16px);
+	}
+	html body[data-page^="admin-services-openclash"] .config-editor-model {
+		min-height: 0;
+		max-height: calc(100dvh - 16px);
+	}
+	html body[data-page="admin-services-openclash-log"] .oc #tab-header .oc-tabmenu {
+		overflow-x: auto;
+	}
+}
+	html body[data-page^="admin-services-openclash"] .oc :is(.card-title, .stats-title, .select-popup-title) {
+		color: var(--text);
+		font-weight: 600;
+		letter-spacing: normal;
+	}
+	html body[data-page="admin-services-openclash-client"] .oc .cbi-button-group {
+		background: var(--seg-bg);
+		box-shadow: none;
+	}
+	html body[data-page="admin-services-openclash-client"] .oc .cbi-button-group .cbi-button-option {
+		min-width: 0;
+		white-space: nowrap;
+		word-break: normal;
+		overflow-wrap: normal;
+	}
+	html body[data-page="admin-services-openclash-client"] .oc #oc-setting-oversea .cbi-button-option {
+		padding-inline: 3px;
+		font-size: var(--fs-sm) !important;
+	}
+	html body[data-page="admin-services-openclash-client"] .oc input[type="radio"]:checked + .cbi-button-option {
+		color: var(--accent-text) !important;
+	}
+	html body[data-page="admin-services-openclash-client"] .oc input[type="radio"]:checked + .cbi-button-option::after {
+		background: var(--seg-on);
+		border-radius: var(--r-sm);
+		box-shadow: inset 0 0 0 1px var(--accent-line);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-client"] .oc .plugin-toggle-switch input:checked + .plugin-toggle-slider {
+		background: var(--accent);
+		border-color: var(--accent-line);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-client"] .oc .plugin-toggle-switch input:checked + .plugin-toggle-slider::before {
+		background: var(--accent-ink);
+	}
+	html body[data-page="admin-services-openclash-client"] .oc :is(#_daip, #_mix_proxy) {
+		color: var(--text);
+		font-variant-numeric: tabular-nums;
+	}
+	html body[data-page^="admin-services-openclash"] :is( .oc-usage-help-float, .oc-switch-mode-btn, #select-popup-footer .footer-btn ) {
+		background: var(--s2) !important;
+		color: var(--text-2) !important;
+		border: 1px solid var(--line-2) !important;
+		box-shadow: none;
+	}
+	html body[data-page^="admin-services-openclash"] :is( .oc-usage-help-float, .oc-switch-mode-btn, #select-popup-footer .footer-btn ):hover:not(:disabled) {
+		background: var(--accent-soft) !important;
+		color: var(--accent-text) !important;
+		border-color: var(--accent-line) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .oc-usage-help-float.active {
+		background: var(--accent-soft) !important;
+		color: var(--accent-text) !important;
+		border-color: var(--accent-line) !important;
+	}
+	html body[data-page^="admin-services-openclash"] :is(.oc-usage-help-float, .footer-btn) {
+		border-radius: var(--r) !important;
+	}
+	html body[data-page="admin-services-openclash-config"] #oc-merge-toggle-btn {
+		width: var(--ctl-h);
+		height: var(--ctl-h);
+	}
+	html body[data-page="admin-services-openclash-settings"] .vt-main .oc-switch-mode-btn {
+		max-width: 100%;
+		width: auto !important;
+		min-width: 0 !important;
+		border-radius: var(--r);
+	}
+	html body[data-page^="admin-services-openclash"] .oc :is( .select-popup-header, .addr-list-scroll, #select-popup-footer ) {
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
+	}
+	html body[data-page^="admin-services-openclash"] .oc .addr-header {
+		background: var(--s3);
+		border-bottom: 1px solid var(--line-2);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is( #cbi-openclash-config_subscribe, #cbi-openclash-authentication, .cbi-tblsection ) > table.cbi-section-table:not(.oc-cbi-table, :has(.oc-merge-value)) {
+		width: 100% !important;
+		min-width: 0 !important;
+		margin-inline: 0 !important;
+		margin-bottom: 0;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is( table.cbi-section-table:not(.oc-cbi-table, :has(.oc-merge-value)), table.oc-tbl ) {
+		border: 1px solid var(--line);
+		border-collapse: separate !important;
+		border-spacing: 0;
+		border-radius: var(--r-lg);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is( .cbi-section-table:not(.oc-cbi-table, :has(.oc-merge-value)) .cbi-section-table-titles > .th, .oc-tbl .oc-tbl-head > th ) {
+		background: var(--s3);
+		color: var(--text-3);
+		font-weight: 600;
+		border-bottom: 1px solid var(--line-2);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is( .cbi-section-table:not(.oc-cbi-table) .cbi-section-table-titles, .oc-tbl .oc-tbl-head ) > th:first-child {
+		border-start-start-radius: var(--r-lg);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is( .cbi-section-table:not(.oc-cbi-table) .cbi-section-table-titles, .oc-tbl .oc-tbl-head ) > th:last-child {
+		border-start-end-radius: var(--r-lg);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is( .cbi-section-table:not(.oc-cbi-table) .cbi-section-table-row, .oc-tbl .oc-tbl-row ):last-child > td:first-child {
+		border-end-start-radius: var(--r-lg);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is( .cbi-section-table:not(.oc-cbi-table) .cbi-section-table-row, .oc-tbl .oc-tbl-row ):last-child > td:last-child {
+		border-end-end-radius: var(--r-lg);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is( #cbi-openclash-dns_servers, .cbi-section.oc:has(table.oc-tbl) ) [id^="tab-header-"] {
+		background: transparent;
+		border: 0;
+		padding: 0;
+		margin-bottom: var(--sp-3);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .cbi-section.oc:has(table.oc-tbl) [id^="tab-header-"] .oc-tabmenu {
+		background: var(--seg-bg);
+		border: 1px solid var(--line) !important;
+		border-radius: var(--r);
+		padding: 3px;
+		gap: 4px;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .cbi-section.oc:has(table.oc-tbl) [id^="tab-header-"] .oc-tabmenu > li {
+		background: transparent !important;
+		border-color: transparent;
+		border-radius: var(--r-sm);
+		opacity: 1;
+		box-shadow: none;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .cbi-section.oc:has(table.oc-tbl) [id^="tab-header-"] .oc-tabmenu > li > a {
+		color: var(--text-2) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .cbi-section.oc:has(table.oc-tbl) [id^="tab-header-"] .oc-tabmenu > .oc-tab {
+		background: var(--seg-on) !important;
+		color: var(--accent-text);
+		box-shadow: inset 0 0 0 1px var(--accent-line);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .cbi-section.oc:has(table.oc-tbl) [id^="tab-header-"] .oc-tabmenu > .oc-tab > a {
+		color: var(--accent-text) !important;
+		font-weight: 600;
+	}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .cbi-section-table .td[data-name="template"] > div {
+		white-space: normal !important;
+		line-height: 1.45 !important;
+		display: block !important;
+		text-overflow: clip !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main table.cbi-section-table td[data-name="name"] > div:not([class]) {
+		text-align: start;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table:has(.oc-actions-menu) .cbi-section-table-titles > th:last-child {
+		text-align: end;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .cbi-section-table td:is([data-name="mtime"], [data-name="size"]) {
+		font-variant-numeric: tabular-nums;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > .oc-cbi-table {
+		width: 100% !important;
+		margin: 0 !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main .oc-cbi-table > tbody {
+		display: block;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main .oc-cbi-table .cbi-section-table-row {
+		display: flex !important;
+		justify-content: flex-end !important;
+		flex-wrap: wrap;
+		gap: var(--sp-2);
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main .oc-cbi-table .cbi-section-table-row > td {
+		flex: 0 0 auto;
+		width: auto !important;
+		height: auto;
+		padding: 0 !important;
+		background: transparent;
+		border: 0;
+	}
+@media (min-width: 721px) {
+	html body[data-page^="admin-services-openclash"] .vt-main :is( .cbi-section-table:not(.oc-cbi-table) .cbi-section-table-titles, .cbi-section-table:not(.oc-cbi-table) .cbi-section-table-row ) > :is(th, td):first-child {
+		padding-inline-start: var(--sp-4) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is( .cbi-section-table:not(.oc-cbi-table) .cbi-section-table-titles, .cbi-section-table:not(.oc-cbi-table) .cbi-section-table-row ) > :is(th, td):last-child {
+		padding-inline-end: var(--sp-4) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-openclash-authentication > .cbi-section-table {
+		table-layout: fixed !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-openclash-authentication th:first-child {
+		width: 6rem !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-openclash-authentication th:last-child {
+		width: 6.5rem !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-openclash-authentication :is(th:first-child, td[data-name="enabled"]) {
+		text-align: center !important;
+		padding-inline: 12px !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-openclash-authentication td[data-name="enabled"] > div {
+		display: flex;
+		justify-content: center;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-openclash-authentication td[data-name="enabled"] .cbi-checkbox {
+		margin: 0;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc-tbl :is(.oc-tbl-head, .oc-tbl-row) > :first-child {
+		padding-inline-start: var(--sp-3);
+	}
+}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .vt-main #tab-header {
+		background: var(--s1);
+		border-color: var(--line);
+		padding: var(--sp-3);
+	}
+	html body[data-page="admin-services-openclash-log"] .vt-main #tab-header .oc-tabmenu > li {
+		height: calc(var(--ctl-h) - 6px);
+	}
+	html body[data-page="admin-services-openclash-log"] .vt-main #tab-content .cm-editor {
+		background: var(--s2);
+		color: var(--text);
+		border-color: var(--line);
+		box-shadow: none;
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .vt-main #debug-rendered {
+		background: var(--s2);
+		color: var(--text);
+		border-color: var(--line);
+		border-radius: var(--r);
+		padding: var(--sp-3);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .vt-main #debug-rendered :is(h1, h2, h3, h4, th, td) {
+		color: var(--text);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .vt-main #debug-rendered :is(pre, blockquote, th) {
+		background: var(--s3);
+		border-color: var(--line);
+	}
+	html[data-darkmode] body[data-page="admin-services-openclash-log"] .vt-main #debug-rendered td {
+		border-color: var(--line);
+	}
+	html body[data-page="admin-services-openclash-log"] .vt-main .oc .log-footer {
+		background: var(--s1);
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
+	}
+	html body[data-page="admin-services-openclash-log"] .vt-main #gen_debug_button {
+		background: var(--accent);
+		color: var(--accent-ink);
+		border-color: var(--accent-line);
+		font-weight: 600;
+	}
+	html body[data-page="admin-services-openclash-log"] .vt-main #gen_debug_button:hover:not(:disabled) {
+		background: var(--accent-hover);
+	}
+	html body[data-page="admin-services-openclash-log"] .vt-main #toggle_refresh_button.active {
+		background: var(--warn-soft);
+		color: var(--warn-text);
+		border-color: color-mix(in srgb, var(--warn) 40%, var(--line-2));
+	}
+	html body :is(.cbi-page-actions, .modal .button-row) :is(.cbi-button-save, .cbi-button-apply, .uci-dialog .cbi-dropdown.cbi-button-positive), html body[data-page^="admin-services-openclash"] :is(.vt-main, .oc, .oc-confirm, .config-editor-model, .config-upload-model, .select-popup, #cbi-table-table, #cbi-openclash-config_subscribe) :where(.cbi-button, .btn, .dashboard-btn, .icon-btn, .footer-btn, .oc-usage-help-float, .sub_setting, .ac-key-btn, .ac-link-btn, .ac-warn-btn, .ac-search-clear, .config-upload-btn-large, .addr-empty-btn, .add-row-btn, .oix-btn, .oix-pwd-toggle, .oc-tpl-open, .oc-sub-help-btn, .oc-confirm-btn, input:is([type="button"], [type="submit"], [type="reset"])) {
+		--vt-control-bg: var(--s3);
+		--vt-control-fg: var(--text);
+		--vt-control-line: var(--line-2);
+		--vt-control-hover: var(--accent-soft);
+		--vt-control-hover-fg: var(--accent-text);
+		--vt-control-hover-line: var(--accent-line);
+		--vt-control-press: color-mix(in srgb, var(--accent) 20%, var(--s3));
+		background-color: var(--vt-control-bg) !important;
+		color: var(--vt-control-fg) !important;
+		border-color: var(--vt-control-line) !important;
+		border-radius: var(--r-lg) !important;
+		box-shadow: none;
+	}
+	html body :is(.cbi-page-actions, .modal .button-row) :is(.cbi-button-save, .cbi-button-apply, .uci-dialog .cbi-dropdown.cbi-button-positive), html body[data-page^="admin-services-openclash"] :is(.vt-main, #cbi-table-table) :where(input[id$=".Commit"], .oc-cbi-table input[id$=".Apply"], .oc-cbi-table input[id$=".Back"]) {
+		min-height: var(--ctl-h) !important;
+		max-width: 100%;
+		border-radius: var(--r) !important;
+	}
+	html body :is(.cbi-page-actions, .modal .button-row) :is(.cbi-button-apply, .uci-dialog .cbi-dropdown.cbi-button-positive), html body[data-page^="admin-services-openclash"] :is(.vt-main, #cbi-table-table, .oc-confirm, .config-editor-model, .config-upload-model) :where(.primary, .oc-confirm-primary, .upload-btn, .oix-btn-primary, #upload-submit, #gen_debug_button, #config-editor-save, .oc-cbi-table td[data-name="Create"] input, .oc-cbi-table input[id$=".Apply"]:not(.cbi-button-reset)) {
+		--vt-control-bg: var(--accent);
+		--vt-control-fg: var(--accent-ink);
+		--vt-control-line: var(--accent-line);
+		--vt-control-hover: var(--accent-hover);
+		--vt-control-hover-fg: var(--accent-ink);
+		--vt-control-hover-line: var(--accent-line);
+		--vt-control-press: color-mix(in srgb, var(--accent-hover) 84%, var(--accent-ink));
+		font-weight: 600;
+	}
+	html body[data-page^="admin-services-openclash"] :is(.vt-main, #cbi-table-table) :where(.cbi-button-edit, .cbi-input-reload, .cbi-input-apply) {
+		--vt-control-fg: var(--accent-text);
+		--vt-control-hover: var(--accent-soft);
+		--vt-control-hover-fg: var(--accent-text);
+		--vt-control-hover-line: var(--accent-line);
+		--vt-control-press: color-mix(in srgb, var(--accent) 20%, var(--s3));
+	}
+	html body[data-page^="admin-services-openclash"] :is(.vt-main, .oc-confirm, #cbi-table-table, #cbi-openclash-config_subscribe) :where(.cbi-button-negative, .cbi-button-remove, .oc-confirm-danger, .oix-btn-danger, #del_log_button, td[data-name^="remove"] input, #select-popup-footer [onclick*="remove_all_core"]):not(:where(td[data-name^="download"] input)) {
+		--vt-control-bg: transparent;
+		--vt-control-fg: var(--err-text);
+		--vt-control-line: color-mix(in srgb, var(--err) 40%, var(--line-2));
+		--vt-control-hover: var(--err-soft);
+		--vt-control-hover-fg: var(--err-text);
+		--vt-control-hover-line: var(--err);
+		--vt-control-press: color-mix(in srgb, var(--err) 23%, var(--s3));
+	}
+	html body[data-page^="admin-services-openclash"] :is(.vt-main, #cbi-table-table) :where(#toggle_refresh_button[data-paused="1"], .ac-warn-btn) {
+		--vt-control-bg: var(--warn-soft);
+		--vt-control-fg: var(--warn-text);
+		--vt-control-line: color-mix(in srgb, var(--warn) 40%, var(--line-2));
+		--vt-control-hover: color-mix(in srgb, var(--warn) 18%, var(--s3));
+		--vt-control-hover-fg: var(--warn-text);
+		--vt-control-hover-line: var(--warn);
+		--vt-control-press: color-mix(in srgb, var(--warn) 25%, var(--s3));
+	}
+	html body :is(.cbi-page-actions, .modal .button-row) :is(.cbi-button-save, .cbi-button-apply, .uci-dialog .cbi-dropdown.cbi-button-positive), html body[data-page^="admin-services-openclash"] :is(.vt-main, .oc, .oc-confirm, .config-editor-model, .config-upload-model, .select-popup, #cbi-table-table, #cbi-openclash-config_subscribe) :where(.cbi-button, .btn, .dashboard-btn, .icon-btn, .footer-btn, .oc-usage-help-float, .sub_setting, .ac-key-btn, .ac-link-btn, .ac-warn-btn, .ac-search-clear, .config-upload-btn-large, .addr-empty-btn, .add-row-btn, .oix-btn, .oix-pwd-toggle, .oc-tpl-open, .oc-sub-help-btn, .oc-confirm-btn, input:is([type="button"], [type="submit"], [type="reset"])) {
+		@media (hover: hover) { &:hover:not(:disabled, [disabled], [aria-disabled="true"], .disabled, .spinning) { background-color: var(--vt-control-hover) !important;
+		color: var(--vt-control-hover-fg) !important;
+		border-color: var(--vt-control-hover-line) !important;
+		} } &:active:not(:disabled, [disabled], [aria-disabled="true"], .spinning) { background-color: var(--vt-control-press) !important;
+		} &:focus-visible { outline: 2px solid var(--focus);
+		outline-offset: 2px;
+		} &:is(:disabled, [disabled], [aria-disabled="true"], .spinning) { opacity: .55;
+		cursor: not-allowed;
+		};
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc-cbi-table .tr:has(:is(input[id$=".Commit"], input[id$=".Apply"], td[data-name="Create"])):hover > .td {
+		background-color: transparent !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-table-table .oc-cbi-table .tr:has(:is(input[id$=".Commit"], td[data-name="Create"])) {
+		display: flex !important;
+		flex-wrap: wrap;
+		justify-content: flex-end !important;
+		gap: var(--sp-2) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-table-table .oc-cbi-table .tr:has(:is(input[id$=".Commit"], td[data-name="Create"])) > .td {
+		flex: 0 1 auto !important;
+		width: auto !important;
+		max-width: 100%;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-table-table .oc-cbi-table .tr:has(:is(input[id$=".Commit"], td[data-name="Create"])) input.cbi-button {
+		box-sizing: border-box;
+		width: auto !important;
+		min-width: 0 !important;
+		max-width: 100% !important;
+		padding-inline: var(--sp-3) !important;
+	}
+@media (max-width: 720px) {
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-table-table .oc-cbi-table .tr:has(:is(input[id$=".Commit"], td[data-name="Create"])) > .td {
+		flex: 1 1 auto !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-table-table .oc-cbi-table .tr:has(input[id$=".Commit"]) > .td {
+		flex-basis: 8rem !important;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table .oc-cbi-table .tr:has(input[id$=".Commit"]) > .td:not(:has(input[id$=".Commit"], input[id$=".Apply"])) {
+		order: 1;
+		flex-basis: 100% !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-table-table .oc-cbi-table .tr:has(input[id$=".Commit"]) > .td > div {
+		display: block !important;
+		width: 100% !important;
+		max-width: none !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main #cbi-table-table .oc-cbi-table .tr:has(:is(input[id$=".Commit"], td[data-name="Create"])) input.cbi-button {
+		width: 100% !important;
+	}
+}
+	html body[data-page^="admin-services-openclash"] :is(.form-checkbox, .radio-button) input:is([type="checkbox"], [type="radio"]) {
+		display: block;
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		clip-path: inset(50%);
+	}
+	html body[data-page^="admin-services-openclash"] :is(.plugin-toggle-switch, .oix-toggle, .form-checkbox) :is(.plugin-toggle-slider, .oix-toggle-slider, .checkmark) {
+		background: var(--s2);
+		border-color: var(--line-2);
+	}
+	html body[data-page^="admin-services-openclash"] :is(.plugin-toggle-switch, .oix-toggle, .form-checkbox) input:enabled:hover + :is(.plugin-toggle-slider, .oix-toggle-slider, .checkmark), html body[data-page^="admin-services-openclash"] .vt-main input:is([type="checkbox"], [type="radio"]):enabled:hover:not(:checked) {
+		border-color: var(--accent-line);
+	}
+	html body[data-page^="admin-services-openclash"] :is(.plugin-toggle-switch, .oix-toggle, .form-checkbox) input:checked + :is(.plugin-toggle-slider, .oix-toggle-slider, .checkmark) {
+		background: var(--accent);
+		border-color: var(--accent-line);
+	}
+	html body[data-page^="admin-services-openclash"] :is(.plugin-toggle-switch, .oix-toggle) input:checked + :is(.plugin-toggle-slider, .oix-toggle-slider)::before {
+		background: var(--accent-ink);
+		box-shadow: none;
+	}
+	html body[data-page^="admin-services-openclash"] .form-checkbox input:checked + .checkmark::after {
+		border-color: var(--accent-ink);
+	}
+	html body[data-page^="admin-services-openclash"] input:focus-visible + :is(.plugin-toggle-slider, .oix-toggle-slider, .checkmark, .cbi-button-option, .mode-pill-opt, .radio-button label) {
+		outline: 2px solid var(--focus);
+		outline-offset: 2px;
+	}
+	html body[data-page^="admin-services-openclash"] input:disabled + :is(.plugin-toggle-slider, .oix-toggle-slider, .checkmark, .cbi-button-option, .mode-pill-opt, .radio-button label) {
+		opacity: .55;
+		cursor: not-allowed;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(.cbi-button-group, .mode-pill, .radio-button, .ac-switch, .icon-pill, .ac-dir-pill, .mode-tabs) {
+		background: var(--seg-bg);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(.cbi-button-group, .mode-pill, .radio-button) input:checked + :is(.cbi-button-option, .mode-pill-opt, label), html body[data-page^="admin-services-openclash"] .vt-main :is(.ac-switch button.on, .icon-pill-opt.active, .ac-dir-opt.active, .mode-tab.active) {
+		background: var(--seg-on) !important;
+		color: var(--accent-text) !important;
+		box-shadow: inset 0 0 0 1px var(--accent-line);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(.cbi-button-group, .mode-pill) input:checked + :is(.cbi-button-option, .mode-pill-opt)::after {
+		background: transparent;
+		box-shadow: none;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(table.cbi-section-table:not(.oc-cbi-table, :has(.oc-merge-value)), table.oc-tbl) {
+		border-collapse: separate !important;
+		border-spacing: 0;
+		border-radius: calc(var(--r-lg) + var(--sp-1)) !important;
+	}
+@media (min-width: 721px) {
+	html body[data-page^="admin-services-openclash"] .vt-main :is(table.cbi-section-table:not(.oc-cbi-table, :has(.oc-merge-value)), table.oc-tbl) > :is(thead, tbody:first-child) > tr:first-child > :is(th, td):first-child {
+		border-start-start-radius: calc(var(--r-lg) + var(--sp-1)) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(table.cbi-section-table:not(.oc-cbi-table, :has(.oc-merge-value)), table.oc-tbl) > :is(thead, tbody:first-child) > tr:first-child > :is(th, td):last-child {
+		border-start-end-radius: calc(var(--r-lg) + var(--sp-1)) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(table.cbi-section-table:not(.oc-cbi-table, :has(.oc-merge-value)), table.oc-tbl) > tbody:last-child > tr:last-child > :is(th, td):first-child {
+		border-end-start-radius: calc(var(--r-lg) + var(--sp-1)) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(table.cbi-section-table:not(.oc-cbi-table, :has(.oc-merge-value)), table.oc-tbl) > tbody:last-child > tr:last-child > :is(th, td):last-child {
+		border-end-end-radius: calc(var(--r-lg) + var(--sp-1)) !important;
+	}
+	html body[data-page="admin-services-openclash-config-overwrite"] .vt-main #cbi-openclash-authentication table.cbi-section-table :is(th, td) {
+		box-sizing: border-box;
+	}
+	html body[data-page="admin-services-openclash-config-overwrite"] .vt-main #cbi-openclash-authentication table.cbi-section-table td > div {
+		max-width: 100%;
+	}
+	html body[data-page="admin-services-openclash-config-overwrite"] .vt-main #cbi-openclash-authentication table.cbi-section-table td :is(input[type="text"], input[type="password"], input.cbi-button) {
+		min-width: 0 !important;
+		max-width: 100% !important;
+	}
+	html body[data-page="admin-services-openclash-config-overwrite"] .vt-main #cbi-openclash-authentication table.cbi-section-table td[data-name="username"] {
+		text-align: start !important;
+		padding-inline: var(--sp-2) !important;
+	}
+	html body[data-page="admin-services-openclash-config-overwrite"] .vt-main #cbi-openclash-authentication table.cbi-section-table td[data-name="username"] > div {
+		justify-content: flex-start !important;
+	}
+	html body[data-page="admin-services-openclash-config-overwrite"] .vt-main #cbi-openclash-authentication table.cbi-section-table td.cbi-section-actions input.cbi-button {
+		width: auto !important;
+	}
+}
+	html body[data-page="admin-services-openclash-config-overwrite"] .vt-main .oc-tbl td[data-name="type"] select {
+		min-width: 6em !important;
+		padding-inline-end: 1.6em;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(.mode-tab, .icon-pill-opt, .ac-dir-opt, .ac-switch button, .radio-button label, .mode-pill-opt, .cbi-button-option, .oc-tpl-tab, .oc-tabmenu > li) {
+		border-radius: var(--r) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(.cbi-button-group .cbi-button-option, .mode-pill .mode-pill-opt)::after, html body[data-page^="admin-services-openclash"] .vt-main .ac-switch button::before {
+		opacity: 0 !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main input:disabled:not(:checked) + :is(.cbi-button-option, .mode-pill-opt, .radio-button label) {
+		background-color: transparent !important;
+		border-color: transparent;
+		color: var(--text-2) !important;
+	}
+	html body[data-page^="admin-services-openclash"] :is(.vt-main, .oc-confirm, .config-editor-model, .config-upload-model, .select-popup) :where(button, [role="button"], .help-link):where(:not(.mode-tab, .icon-pill-opt, .ac-dir-opt, .ac-switch button, .oc-tpl-tab, .vt-help)) {
+		border-radius: var(--r-lg);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .ac-th-cell {
+		border-radius: var(--r);
+	}
+	html body[data-page^="admin-services-openclash"] .oc .subscription-nav-arrow {
+		display: grid;
+		place-items: center;
+		inline-size: 20px;
+		block-size: 24px;
+		border: 0;
+		border-radius: var(--r);
+		color: var(--text-2);
+		transition: background-color .12s, color .12s;
+	}
+	html body[data-page^="admin-services-openclash"] .oc .subscription-nav-arrow.left {
+		left: 2px;
+	}
+	html body[data-page^="admin-services-openclash"] .oc .subscription-nav-arrow.right {
+		right: 2px;
+	}
+	html body[data-page^="admin-services-openclash"] .oc .subscription-nav-arrow::before {
+		content: "";
+		inline-size: 6px;
+		block-size: 6px;
+		border-block-start: 2px solid currentColor;
+		border-inline-end: 2px solid currentColor;
+		transform: rotate(45deg);
+	}
+	html body[data-page^="admin-services-openclash"] .oc .subscription-nav-arrow.left::before {
+		transform: rotate(225deg);
+	}
+@media (hover: hover) {
+	html body[data-page^="admin-services-openclash"] .oc .subscription-nav-arrow:hover:not(.disabled) {
+		background-color: var(--accent-soft);
+		color: var(--accent-text);
+		transform: translateY(-50%);
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(.mode-tab, .icon-pill-opt, .ac-dir-opt, .ac-switch button, .radio-button label, .mode-pill-opt, .cbi-button-option, .oc-tpl-tab, .oc-tabmenu > li):hover:not(:disabled, [disabled], [aria-disabled="true"], .disabled, .ac-disabled *, input:disabled + *) {
+		&:not(.active, .on, .oc-tab, [aria-selected="true"], input:checked + *) { background-color: var(--accent-soft) !important;
+		color: var(--accent-text) !important;
+		} &:is(.active, .on, .oc-tab, [aria-selected="true"], input:checked + *) { box-shadow: inset 0 0 0 2px var(--accent-line);
+		};
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .cbi-section.oc:has(table.oc-tbl) [id^="tab-header-"] .oc-tabmenu > li:not(.oc-tab, [aria-disabled="true"]):hover {
+		background-color: var(--accent-soft) !important;
+	}
+	html body[data-page^="admin-services-openclash"] .vt-main .oc-tabmenu > li:not(.oc-tab, [aria-disabled="true"]):hover > a {
+		color: var(--accent-text) !important;
+	}
+	html body[data-page^="admin-services-openclash"] :is(.vt-main, .oc-confirm, .config-editor-model, .config-upload-model, .select-popup) :where(button, [role="button"], .help-link):where(:not(.mode-tab, .icon-pill-opt, .ac-dir-opt, .ac-switch button, .oc-tpl-tab, .vt-help)):hover:not(:disabled, [disabled], [aria-disabled="true"], .disabled, .spinning, .ac-disabled *) {
+		background-color: var(--vt-control-hover, var(--accent-soft)) !important;
+		color: var(--vt-control-hover-fg, var(--accent-text)) !important;
+	}
+}
+	html body[data-page^="admin-services-openclash"] .vt-main :is(.mode-tab, .icon-pill-opt, .ac-dir-opt, .ac-switch button, .oc-tpl-tab):focus-visible {
+		outline: 2px solid var(--focus);
+		outline-offset: 2px;
+	}
+@media (max-width: 720px) {
+	html body[data-page="admin-services-openclash-client"] .oc .oc-float-stack {
+		bottom: calc(var(--bar-h, 60px) + env(safe-area-inset-bottom, 0px) + 12px) !important;
+	}
+}
+	html body[data-page="admin-services-openclash-client"] .oc .core-main-controls {
+		padding-block: 3px;
+	}
+@media (min-width: 721px) {
+	html body[data-page="admin-services-openclash-config"] .vt-main #cbi-table-table:has(.oc-actions-menu) .cbi-section-table-titles > th:last-child {
+		text-align: start;
+	}
+	html body:is([data-page="admin-services-openclash-config"], [data-page$="-providers-file-manage"]) .vt-main table.cbi-section-table:not(.oc-cbi-table) td[data-name="name"][data-widget="dvalue"] {
+		text-align: start !important;
+		padding-inline: 8px !important;
+	}
+	html body:is([data-page="admin-services-openclash-config"], [data-page$="-providers-file-manage"]) .vt-main table.cbi-section-table:not(.oc-cbi-table) td[data-name="name"][data-widget="dvalue"] > div {
+		justify-content: flex-start !important;
+		text-align: start !important;
+	}
+	html body[data-page="admin-services-openclash-config"] .vt-main td[data-widget="sub_info_show"] .sub_div {
+		margin-inline: 0 auto !important;
+	}
+}
+	html body[data-page="admin-services-openclash-client"] .vt-main .oc .cbi-button-group {
+		gap: 3px;
+		padding: 3px;
+		border-radius: var(--r-lg) !important;
+	}
+	html body[data-page="admin-services-openclash-client"] .vt-main .oc .cbi-button-group .cbi-button-option::before {
+		display: none !important;
+	}
+	html body[data-page="admin-services-openclash-client"] .oc :is(.stats-view-toggle, .ac-dir-pill, .ac-switch) {
+		gap: 3px;
+		padding: 3px;
+		border-radius: var(--r-lg) !important;
+	}
+	html body[data-page="admin-services-openclash-client"] .oc .stats-view-toggle .icon-pill-opt::before {
+		display: none !important;
+	}
+	html body[data-page^="admin-services-openclash"] .cm-editor .cm-gutters {
+		box-sizing: border-box;
+		min-width: 0;
+		padding-right: 4px;
+	}
+	html body[data-page^="admin-services-openclash"] .cm-editor .cm-lineNumbers {
+		min-width: 0;
+	}
+	html body[data-page^="admin-services-openclash"] .cm-editor .cm-lineNumbers .cm-gutterElement {
+		text-align: center !important;
+		padding-inline: 4px !important;
+	}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .cbi-section-table td[data-widget="update_config"] input.cbi-input-reload {
+		width: auto !important;
+		max-width: 100% !important;
+		flex: 0 1 auto !important;
+	}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .cbi-section-table td[data-widget="update_config"] input.cbi-input-reload:not(:hover):not(:focus-visible) {
+		background: var(--s2) !important;
+		color: var(--text-2) !important;
+		border-color: var(--line-2) !important;
+	}
+@media (max-width: 720px) {
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .cbi-section-table td[data-widget="update_config"] > div:not([class]) {
+		justify-content: flex-start !important;
+	}
+}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .cbi-section-table td[data-widget="update_config"] input.cbi-input-reload {
+		width: 46px !important;
+	}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .cbi-section-table td[data-widget="update_config"] input.cbi-input-reload:disabled {
+		width: 100% !important;
+	}
+@media (max-width: 720px) {
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .cbi-section-table > tbody > .tr > .td:nth-child(5) > div:not([class]) {
+		justify-content: flex-start !important;
+	}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .tr > .td:nth-child(5) input.cbi-input-reload:disabled {
+		width: 100% !important;
+	}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .cbi-section-table .cbi-section-table-row > td.cbi-section-actions {
+		row-gap: 0 !important;
+	}
+}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .cbi-section-table td[data-widget="update_config"] input.cbi-input-reload {
+		line-height: 30px !important;
+	}
+@media (max-width: 720px) {
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) tr.cbi-section-table-row {
+		justify-content: flex-start !important;
+		gap: 4px !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) tr.cbi-section-table-row > td {
+		box-sizing: border-box !important;
+		min-width: 0 !important;
+		width: auto !important;
+		height: auto !important;
+		padding: 4px 6px !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) td[data-name="num"] {
+		flex: 0 0 28px !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) td[data-name="name"] {
+		flex: 1 1 calc(100% - 32px) !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) td[data-name="name"] > div {
+		justify-content: flex-start !important;
+		text-align: start !important;
+		overflow-wrap: anywhere;
+		word-break: break-word;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) td[data-name="mtime"] {
+		flex: 1 1 60% !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) td[data-name="size"] {
+		flex: 1 1 30% !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) td:is([data-name="edit"], [data-name="download1"], [data-name="remove1"]) {
+		flex: 1 1 30% !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) td:is([data-name="download2"], [data-name="remove2"]) {
+		flex: 1 1 30% !important;
+	}
+}
+@media (min-width: 1000px) {
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) {
+		table-layout: fixed !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) tr > :is(th, td):nth-child(1) {
+		width: 7% !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) tr > :is(th, td):nth-child(2) {
+		width: 35% !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) tr > :is(th, td):nth-child(3) {
+		width: 20% !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) tr > :is(th, td):nth-child(4) {
+		width: 8% !important;
+	}
+	html body[data-page^="admin-services-openclash"][data-page$="-providers-file-manage"] .vt-main #cbi-table-table > table.cbi-section-table:not(.oc-cbi-table) tr > :is(th, td):nth-child(n+5) {
+		width: 10% !important;
+	}
+}
+	html body[data-page="admin-services-openclash-config-subscribe"] #cbi-openclash-config_subscribe .td[data-name="address"][data-widget="tvalue"] textarea {
+		height: auto !important;
+		min-height: 54px !important;
+		max-height: none !important;
+		overflow-y: hidden !important;
+	}
