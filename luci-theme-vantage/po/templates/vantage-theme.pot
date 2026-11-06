@@ -71,7 +71,7 @@ msgstr ""
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1263
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1267
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1533
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:85
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:88
 msgctxt "vantage-theme"
 msgid "Appearance"
 msgstr ""
@@ -95,7 +95,7 @@ msgctxt "vantage-theme"
 msgid "Back to the calling chain"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:73
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:76
 msgctxt "vantage-theme"
 msgid "Breadcrumb"
 msgstr ""
@@ -198,7 +198,7 @@ msgid "Egress"
 msgstr ""
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:897
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:58
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:61
 msgid "Expand navigation"
 msgstr ""
 
@@ -243,7 +243,7 @@ msgstr ""
 msgid "Grid packets"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:53
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:56
 msgctxt "vantage-theme"
 msgid "Home"
 msgstr ""
@@ -300,7 +300,7 @@ msgid "Log in"
 msgstr ""
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1269
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:88
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:91
 msgid "Log out"
 msgstr ""
 
@@ -309,7 +309,7 @@ msgstr ""
 msgid "Login background"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:52
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:55
 msgctxt "vantage-theme"
 msgid "Main navigation"
 msgstr ""
@@ -391,7 +391,7 @@ msgctxt "vantage-theme"
 msgid "Packet path"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:94
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:97
 msgid "Page tabs"
 msgstr ""
 
@@ -455,8 +455,8 @@ msgid "Rules table"
 msgstr ""
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1290
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:76
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:78
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:79
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:81
 msgid "Search pages"
 msgstr ""
 
@@ -479,7 +479,7 @@ msgstr ""
 msgid "Show full help: %s"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:49
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:52
 msgid "Skip to content"
 msgstr ""
 

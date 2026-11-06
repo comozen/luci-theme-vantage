@@ -77,7 +77,7 @@ msgstr "任意数据包"
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1263
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1267
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1533
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:85
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:88
 msgctxt "vantage-theme"
 msgid "Appearance"
 msgstr "外观"
@@ -101,7 +101,7 @@ msgctxt "vantage-theme"
 msgid "Back to the calling chain"
 msgstr "返回调用链"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:73
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:76
 msgctxt "vantage-theme"
 msgid "Breadcrumb"
 msgstr "面包屑"
@@ -204,7 +204,7 @@ msgid "Egress"
 msgstr "出口"
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:897
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:58
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:61
 msgid "Expand navigation"
 msgstr "展开导航"
 
@@ -254,7 +254,7 @@ msgstr "空闲"
 msgid "Grid packets"
 msgstr "网格数据包"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:53
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:56
 msgctxt "vantage-theme"
 msgid "Home"
 msgstr "首页"
@@ -311,7 +311,7 @@ msgid "Log in"
 msgstr "登录"
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1269
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:88
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:91
 msgid "Log out"
 msgstr "退出登录"
 
@@ -320,7 +320,7 @@ msgstr "退出登录"
 msgid "Login background"
 msgstr "登录背景"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:52
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:55
 msgctxt "vantage-theme"
 msgid "Main navigation"
 msgstr "主导航"
@@ -402,7 +402,7 @@ msgctxt "vantage-theme"
 msgid "Packet path"
 msgstr "数据包路径"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:94
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:97
 msgid "Page tabs"
 msgstr "页面标签页"
 
@@ -466,8 +466,8 @@ msgid "Rules table"
 msgstr "规则表"
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1290
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:76
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:78
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:79
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:81
 msgid "Search pages"
 msgstr "搜索页面"
 
@@ -489,7 +489,7 @@ msgstr "显示完整描述"
 msgid "Show full help: %s"
 msgstr "显示完整帮助：%s"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:49
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:52
 msgid "Skip to content"
 msgstr "跳至正文"
 
