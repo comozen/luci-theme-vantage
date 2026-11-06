@@ -1,0 +1,158 @@
+name: QWRT
+
+# The fork's own pipeline, kept out of ci.yml so that file stays exactly
+# as upstream ships it: everything QWRT-specific lives here instead.
+#
+#   push to qwrt           tests and security checks only
+#   push of a qwrt-v* tag  checks, one ipk build (OpenWrt 24.10), and a
+#                          release with the packages, unsigned
+#   workflow_dispatch      the same, by hand
+#
+# Tags are qwrt-v*, never v*: the v* path in ci.yml is bound to the
+# signing keys and the release manifests.
+
+on:
+  push:
+    branches: [ qwrt ]
+    tags: [ 'qwrt-v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qwrt-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # ucode as pinned by OpenWrt 25.12 (package/utils/ucode PKG_SOURCE_VERSION)
+  UCODE_REPO: https://github.com/jow-/ucode.git
+  UCODE_REV: 85922056ef7abeace3cca3ab28bc1ac2d88e31b1
+  SDK_RELEASE: 24.10.8
+
+jobs:
+  checks:
+    name: Tests and security checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+
+      - name: Build ucode (for the rpcd plugin tests); install gettext
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq cmake libjson-c-dev gettext
+          git init -q "$RUNNER_TEMP/ucode-src"
+          git -C "$RUNNER_TEMP/ucode-src" fetch -q --depth 1 "$UCODE_REPO" "$UCODE_REV"
+          git -C "$RUNNER_TEMP/ucode-src" checkout -q FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/ucode-src" rev-parse HEAD)" = "$UCODE_REV"
+          cmake -S "$RUNNER_TEMP/ucode-src" -B "$RUNNER_TEMP/ucode-build" \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/ucode" \
+            -DCMAKE_C_FLAGS=-Wno-error=discarded-qualifiers \
+            -DUBUS_SUPPORT=OFF -DUCI_SUPPORT=OFF -DULOOP_SUPPORT=OFF -DRTNL_SUPPORT=OFF \
+            -DNL80211_SUPPORT=OFF -DRESOLV_SUPPORT=OFF -DDIGEST_SUPPORT=OFF \
+            -DLOG_SUPPORT=OFF -DSOCKET_SUPPORT=OFF -DZLIB_SUPPORT=OFF
+          cmake --build "$RUNNER_TEMP/ucode-build" -j"$(nproc)"
+          cmake --install "$RUNNER_TEMP/ucode-build"
+          echo "UCODE=$RUNNER_TEMP/ucode/bin/ucode" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$RUNNER_TEMP/ucode/lib" >> "$GITHUB_ENV"
+
+      - name: Unit tests
+        env:
+          # the catalogue tests must not skip msgfmt here
+          VANTAGE_REQUIRE_GETTEXT: '1'
+        run: node --test tests/
+
+      - name: Translation templates and catalogues up to date
+        run: dev/i18n/update.sh --check
+
+      - name: DOM sink check
+        run: node security-tests/check_dom_sinks.js
+
+      - name: Template security test
+        run: node security-tests/test_templates.js
+
+      - name: ACL policy test
+        run: node security-tests/test_acl_policy.js
+
+      - name: Private address check
+        run: node security-tests/check_private_addresses.js
+
+  build:
+    name: Build the ipk
+    needs: checks
+    # a push to qwrt only runs the checks: the tag is what builds
+    if: startsWith(github.ref, 'refs/tags/qwrt-v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+
+      - name: Build with the pinned SDK (verifies every package)
+        run: |
+          podman --version
+          dev/build/sdk-build.sh "$SDK_RELEASE" HEAD
+
+      - name: Upload packages
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vantage-${{ env.SDK_RELEASE }}
+          path: |
+            dist/${{ env.SDK_RELEASE }}/*.ipk
+            dist/${{ env.SDK_RELEASE }}/SHA256SUMS
+            dist/${{ env.SDK_RELEASE }}/BUILDINFO
+          if-no-files-found: error
+
+  publish:
+    name: Publish the QWRT packages
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/qwrt-v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download the packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: vantage-24.10.8
+          path: qwrt
+
+      - name: Name the packages for QWRT
+        # the file name only: the control keeps Architecture: all, opkg
+        # never looks at it
+        run: |
+          set -euo pipefail
+          cd qwrt
+          for f in *_all.ipk; do
+            [ -e "$f" ] || continue
+            mv -- "$f" "${f%_all.ipk}_qwrt.ipk"
+          done
+          sha256sum -- *.ipk > SHA256SUMS
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" qwrt/*.ipk qwrt/SHA256SUMS qwrt/BUILDINFO \
+            --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "Vantage ${GITHUB_REF_NAME#qwrt-v} (QWRT)" \
+            --notes "Unsigned ipk packages for QWRT (opkg), built from ${GITHUB_SHA}."

@@ -17,8 +17,8 @@ name: CI
 
 on:
   push:
-    branches: [main, qwrt]
-    tags: ['v*', 'qwrt-v*']
+    branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
@@ -98,9 +98,6 @@ jobs:
   build:
     name: Build packages (OpenWrt ${{ matrix.sdk }})
     needs: checks
-    # a push to qwrt only runs the checks: the qwrt-v* tag is what builds
-    # and publishes, so the same commit is not packaged twice
-    if: github.ref != 'refs/heads/qwrt' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     # a tag push builds in the release-signing environment (approved per
@@ -110,7 +107,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # QWRT is opkg only: the apk build stays out of this branch
+          - sdk: 25.12.4
+            fmt: apk
           - sdk: 24.10.8
             fmt: ipk
     env:
@@ -231,44 +229,6 @@ jobs:
               --notes "Packages for OpenWrt ${SDK_APK} (apk) and ${SDK_IPK} (ipk), built by CI from ${GITHUB_SHA}. What changed: https://github.com/${REPO}/blob/${TAG}/CHANGELOG.md. See SHA256SUMS, SHA256SUMS-24.10, the BUILDINFO files and docs/INSTALL.md." \
               *
           fi
-
-  publish-qwrt:
-    name: Publish the QWRT packages
-    needs: build
-    # qwrt-v* tags: unsigned ipk releases for the fork, never the v* path
-    # above, which is tied to the signing keys and the release manifests
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/qwrt-v')
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    steps:
-      - name: Download the packages
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: vantage-24.10.8
-          path: qwrt
-
-      - name: Name the packages for QWRT
-        # the file name only: the control keeps Architecture: all, opkg
-        # never looks at it
-        run: |
-          set -euo pipefail
-          cd qwrt
-          for f in *_all.ipk; do
-            [ -e "$f" ] || continue
-            mv -- "$f" "${f%_all.ipk}_qwrt.ipk"
-          done
-          sha256sum -- *.ipk > SHA256SUMS
-
-      - name: Create the release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          gh release create "$GITHUB_REF_NAME" qwrt/*.ipk qwrt/SHA256SUMS qwrt/BUILDINFO \
-            --repo "$GITHUB_REPOSITORY" --verify-tag \
-            --title "Vantage ${GITHUB_REF_NAME#qwrt-v} (QWRT)" \
-            --notes "Unsigned ipk packages for QWRT (opkg), built from ${GITHUB_SHA}."
 
   repository:
     name: Publish signed package repositories
