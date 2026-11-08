@@ -71,12 +71,12 @@ msgstr ""
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1316
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1320
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1677
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:132
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:136
 msgctxt "vantage-theme"
 msgid "Appearance"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:48
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:49
 msgid "Authorization Required"
 msgstr ""
 
@@ -95,7 +95,7 @@ msgctxt "vantage-theme"
 msgid "Back to the calling chain"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:120
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:124
 msgctxt "vantage-theme"
 msgid "Breadcrumb"
 msgstr ""
@@ -202,7 +202,7 @@ msgid "Egress"
 msgstr ""
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:950
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:105
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:109
 msgid "Expand navigation"
 msgstr ""
 
@@ -247,7 +247,7 @@ msgstr ""
 msgid "Grid packets"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:100
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:104
 msgctxt "vantage-theme"
 msgid "Home"
 msgstr ""
@@ -280,7 +280,7 @@ msgctxt "vantage-theme"
 msgid "Input"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:52
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:53
 msgid "Invalid username and/or password! Please try again."
 msgstr ""
 
@@ -299,7 +299,7 @@ msgid "Light"
 msgstr ""
 
 #: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:28
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:64
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:65
 msgid "Log in"
 msgstr ""
 
@@ -308,7 +308,7 @@ msgid "Log in again to save Appearance for every browser."
 msgstr ""
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1322
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:135
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:139
 msgid "Log out"
 msgstr ""
 
@@ -317,7 +317,7 @@ msgstr ""
 msgid "Login background"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:99
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:103
 msgctxt "vantage-theme"
 msgid "Main navigation"
 msgstr ""
@@ -399,7 +399,7 @@ msgctxt "vantage-theme"
 msgid "Packet path"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:141
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:145
 msgid "Page tabs"
 msgstr ""
 
@@ -413,7 +413,7 @@ msgctxt "vantage-theme"
 msgid "Passes unmatched"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:61
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:62
 msgid "Password"
 msgstr ""
 
@@ -467,8 +467,8 @@ msgid "Saved in this browser only."
 msgstr ""
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1343
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:123
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:125
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:127
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:129
 msgid "Search pages"
 msgstr ""
 
@@ -491,7 +491,7 @@ msgstr ""
 msgid "Show full help: %s"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:96
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:100
 msgid "Skip to content"
 msgstr ""
 
@@ -549,7 +549,7 @@ msgstr ""
 msgid "Used"
 msgstr ""
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:57
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:58
 msgid "Username"
 msgstr ""
 
