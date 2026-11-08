@@ -27,6 +27,7 @@
 </div>
 {% endif %}
 {% if (ctx.authsession && !blank_page): %}
+<script src="{{ media }}/subscribe-autosize.js" defer></script>
 <script>L.require('menu-vantage');</script>
 {% endif %}
 </body>
