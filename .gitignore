@@ -25,3 +25,6 @@ key-build*
 private-key*
 *.key
 *.sec
+
+# macOS Finder metadata
+.DS_Store
