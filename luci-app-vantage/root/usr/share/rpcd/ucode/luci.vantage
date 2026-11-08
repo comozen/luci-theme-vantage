@@ -55,8 +55,7 @@
 
 import { cursor } from 'uci';
 import { connect } from 'ubus';
-import { lsdir, readfile } from 'fs';
-import * as rtnl from 'rtnl';
+import { lsdir, popen, readfile } from 'fs';
 
 const CONFIG = 'vantage';
 const WIRELESS = 'wireless';      // read only, by wireless_from_config()
@@ -69,9 +68,9 @@ const THERMAL = '/sys/class/thermal';
 const MAX_ZONES = 16;
 const MAX_HOSTS = 512;            // wired hosts per reply
 const MAX_PER_PORT = 128;         // of them on one port (the uplink's would take them all)
-const PROBE4 = '198.51.100.1';    // routes: looked up, never sent to (documentation ranges)
-const PROBE6 = '2001:db8::1';
 const NET = '/sys/class/net';
+const PROC_ROUTE = '/proc/net/route';   // routes: no rtnl on QSDK firmware
+const PROC_ROUTE6 = '/proc/net/ipv6_route';
 const FDB_LIMIT = 4096;           // forwarding entries, all bridges together, before wired() lists none
 const FDB_ENTRY = 16;             // sizeof(struct __fdb_entry), brforward's record
 const NETWORK = 'network';        // read only, by switches(): switch_vlan sections
@@ -329,6 +328,12 @@ function wireless_from_config() {
 		let r = (type(s.device) == 'string') ? radios[s.device] : null;
 		let ifname = s.ifname;
 
+		/* QSDK names each VAP netdev after its section and leaves ifname
+		   out of the config; only a name the kernel really has counts */
+		if (type(ifname) != 'string' && match(s['.name'], /^[A-Za-z0-9_.-]{1,64}$/) &&
+		    (s['.name'] in (lsdir(NET) ?? [])))
+			ifname = s['.name'];
+
 		if (type(r) != 'object' || uci_true(s.disabled) || type(ifname) != 'string' ||
 		    !match(ifname, RE_NAME) || taken[ifname])
 			return;
@@ -541,65 +546,148 @@ function crowded() {
 
 // [ { mac, port, bridge, vlan, seen } ] in dump order, at most MAX_HOSTS
 // and MAX_PER_PORT a port: what the bridges learned from their ports.
-// Left out: the bridges' own addresses (permanent), the switch drivers'
-// copies (self, no master) and group addresses. seen: seconds since the
-// bridge last heard from the host (the kernel counts in 1/100 s), null
-// for a static entry. null when a bridge is crowded.
+// Left out: the bridges' own addresses (is_local), ports no bridge knows
+// and group addresses. seen: seconds since the bridge last heard from the
+// host (brforward counts in 1/100 s); null when the record has no timer.
+// null when a bridge is crowded.
+//
+// brforward and the port map rather than a netlink dump: QSDK firmware
+// ships no ucode-mod-rtnl, and ucode resolves imports when the module is
+// compiled, so importing it would keep the whole plugin from loading there.
+function bridge_ports(br) {
+	let ports = {};
+
+	for (let p in (lsdir(NET + '/' + br + '/brif') ?? [])) {
+		if (!netdev(p))
+			continue;
+
+		let no = trim(readfile(NET + '/' + br + '/brif/' + p + '/port_no', 16) ?? '');
+
+		if (match(no, /^(0x)?[0-9a-fA-F]{1,4}$/))
+			ports[hex(no)] = p;
+	}
+
+	return ports;
+}
+
 function wired() {
 	if (crowded())
 		return null;
 
-	let fdb = rtnl.request(rtnl.const.RTM_GETNEIGH, rtnl.const.NLM_F_DUMP, { family: rtnl.const.AF_BRIDGE });
-	let out = [], per = {};
+	let out = [], per = {}, left = FDB_LIMIT * FDB_ENTRY;
 
-	for (let n in ((type(fdb) == 'array') ? fdb : [])) {
-		if (length(out) >= MAX_HOSTS)
-			break;
-
-		let mac = (type(n) == 'object') ? norm_mac(n.lladdr) : null;
-
-		if (!mac || is_multicast(mac) || type(n.state) != 'int' || (n.state & rtnl.const.NUD_PERMANENT) ||
-		    (type(n.flags) == 'int' && (n.flags & rtnl.const.NTF_SELF)) || !netdev(n.master) || !netdev(n.dev) ||
-		    (per[n.dev] ?? 0) >= MAX_PER_PORT)
+	for (let br in (lsdir(NET) ?? [])) {
+		if (!netdev(br) || lsdir(NET + '/' + br + '/brif') == null)
 			continue;
 
-		per[n.dev] = (per[n.dev] ?? 0) + 1;
+		let ports = bridge_ports(br);
+		let raw = readfile(NET + '/' + br + '/brforward', left);
 
-		let upd = n.cacheinfo?.updated;
+		if (type(raw) != 'string' || length(raw) < FDB_ENTRY)
+			continue;
 
-		push(out, {
-			mac,
-			port: n.dev,
-			bridge: n.master,
-			vlan: (type(n.vlan) == 'int' && n.vlan > 0 && n.vlan < 4095) ? n.vlan : null,
-			seen: (!(n.state & rtnl.const.NUD_NOARP) && type(upd) == 'int' && upd >= 0) ? int(upd / 100) : null
-		});
+		left -= length(raw);
+
+		if (left <= 0)
+			break;
+
+		for (let i = 0; i + FDB_ENTRY <= length(raw) && length(out) < MAX_HOSTS; i += FDB_ENTRY) {
+			let at = (k) => ord(substr(raw, i + k, 1));
+
+			if (at(7) != 0)
+				continue;
+
+			let mac = sprintf('%02x:%02x:%02x:%02x:%02x:%02x',
+				at(0), at(1), at(2), at(3), at(4), at(5));
+			let port = ports[at(6) | (at(12) << 8)];
+
+			if (!mac || is_multicast(mac) || !port || (per[port] ?? 0) >= MAX_PER_PORT)
+				continue;
+
+			per[port] = (per[port] ?? 0) + 1;
+
+			push(out, {
+				mac,
+				port,
+				bridge: br,
+				vlan: null,
+				seen: int((at(8) | (at(9) << 8) | (at(10) << 16) | (at(11) << 24)) / 100)
+			});
+		}
 	}
 
 	return out;
 }
 
-// [ { family, dev, metric } ] for the families whose lookup answers with
-// a unicast default route in the main table (no dst), IPv4 then IPv6; dev
-// null over several next hops (multipath, no single oif). null when a
-// lookup could not be sent; false is the kernel's error, for a lookup that
-// there is no route (ENETUNREACH), so that family is left out.
-function routes() {
+// [ { family, dev, metric } ] for the default route ordinary traffic
+// takes, IPv4 then IPv6: the lowest metric in the main table, read from
+// /proc, since QSDK firmware ships no ucode-mod-rtnl. A family without a
+// default route is left out; null when the tables cannot be read. No
+// gateways, and no single dev on a multipath route.
+function best_route(list) {
+	let best = null;
+
+	for (let r in list)
+		if (r.dev && (best == null || r.metric < best.metric))
+			best = r;
+
+	return best;
+}
+
+function routes_v4() {
+	let raw = readfile(PROC_ROUTE, 65536);
+
+	if (type(raw) != 'string')
+		return null;
+
 	let out = [];
 
-	for (let q in [ { family: rtnl.const.AF_INET, dst: PROBE4 }, { family: rtnl.const.AF_INET6, dst: PROBE6 } ]) {
-		let r = rtnl.request(rtnl.const.RTM_GETROUTE, 0, { family: q.family, dst: q.dst, flags: rtnl.const.RTM_F_FIB_MATCH });
+	for (let line in split(raw, '\n')) {
+		let f = split(trim(line), /[[:space:]]+/);
 
-		if (r === null)
-			return null;
-
-		if (type(r) != 'object' || r.family != q.family || r.dst != null || r.table != rtnl.const.RT_TABLE_MAIN || r.type != rtnl.const.RTN_UNICAST)
+		if (length(f) < 8 || f[0] == 'Iface' || f[1] != '00000000' || f[7] != '00000000')
 			continue;
 
-		let m = r.priority ?? 0;
+		if ((hex(f[3]) & 0x1) == 0)
+			continue;
 
-		push(out, { family: (q.family == rtnl.const.AF_INET) ? 4 : 6, dev: netdev(r.oif), metric: (type(m) == 'int' && m >= 0) ? m : 0 });
+		push(out, { dev: netdev(f[0]), metric: int(f[6]) });
 	}
+
+	return out;
+}
+
+function routes_v6() {
+	let raw = readfile(PROC_ROUTE6, 65536);
+
+	if (type(raw) != 'string')
+		return null;
+
+	let out = [];
+
+	for (let line in split(raw, '\n')) {
+		let f = split(trim(line), /[[:space:]]+/);
+
+		if (length(f) < 10 || !match(f[0], /^0{32}$/) || f[1] != '00' || (hex(f[8]) & 0x1) == 0)
+			continue;
+
+		push(out, { dev: netdev(f[9]), metric: hex(f[5]) });
+	}
+
+	return out;
+}
+
+function routes() {
+	let v4 = routes_v4(), v6 = routes_v6();
+
+	if (v4 == null || v6 == null)
+		return null;
+
+	let out = [];
+
+	for (let q in [ { family: 4, best: best_route(v4) }, { family: 6, best: best_route(v6) } ])
+		if (q.best)
+			push(out, { family: q.family, dev: q.best.dev, metric: q.best.metric });
 
 	return out;
 }
@@ -760,6 +848,61 @@ const methods = {
 	routes: {
 		call: function() {
 			return { routes: routes() };
+		}
+	},
+
+	// Per-station byte and packet counters from the vendor tool: QSDK's
+	// iwinfo assoclist reports zeros for them, and 80211stats is the only
+	// source left. One fixed command; device and MACs are validated, so no
+	// argument can add anything to it.
+	counters: {
+		args: { device: '', macs: [] },
+		call: function(request) {
+			let dev = request.args.device, out = [];
+
+			if (type(dev) != 'string' || !match(dev, /^[A-Za-z0-9_.-]{1,15}$/) ||
+			    !(dev in (lsdir(NET) ?? [])))
+				return { results: out };
+
+			let macs = (type(request.args.macs) == 'array') ? request.args.macs : [];
+			let seen = 0;
+
+			for (let m in macs) {
+				if (seen++ >= 64)
+					break;
+
+				let mac = norm_mac(m);
+
+				if (!mac)
+					continue;
+
+				let f = popen('/usr/bin/timeout 2 /usr/sbin/80211stats -i ' + dev + ' ' + mac, 'r');
+
+				if (!f)
+					continue;
+
+				let toks = split(f.read('all') ?? '', /[[:space:]]+/);
+				let v = {};
+
+				f.close();
+
+				for (let i = 0; i + 1 < length(toks); i++) {
+					if (match(toks[i], /^[a-z_]{1,32}$/) && match(toks[i + 1], /^[0-9]{1,18}$/)) {
+						v[toks[i]] = int(toks[i + 1]);
+						i++;
+					}
+				}
+
+				push(out, {
+					mac,
+					rxBytes: v.rx_bytes ?? null,
+					txBytes: v.tx_bytes ?? null,
+					rxPackets: v.rx_data ?? null,
+					txPackets: v.tx_data ?? null
+				});
+			}
+
+			return { results: out };
 		}
 	},
 
