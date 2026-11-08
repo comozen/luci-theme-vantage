@@ -77,12 +77,12 @@ msgstr "任意数据包"
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1359
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1363
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1745
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:136
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:140
 msgctxt "vantage-theme"
 msgid "Appearance"
 msgstr "外观"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:50
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:51
 msgid "Authorization Required"
 msgstr "需要授权"
 
@@ -101,7 +101,7 @@ msgctxt "vantage-theme"
 msgid "Back to the calling chain"
 msgstr "返回调用链"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:124
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:128
 msgctxt "vantage-theme"
 msgid "Breadcrumb"
 msgstr "面包屑"
@@ -220,7 +220,7 @@ msgid "Egress"
 msgstr "出口"
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:993
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:107
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:111
 msgid "Expand navigation"
 msgstr "展开导航"
 
@@ -270,7 +270,7 @@ msgstr "空闲"
 msgid "Grid packets"
 msgstr "网格数据包"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:101
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:105
 msgctxt "vantage-theme"
 msgid "Home"
 msgstr "首页"
@@ -307,7 +307,7 @@ msgctxt "vantage-theme"
 msgid "Input"
 msgstr "输入"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:54
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:55
 msgid "Invalid username and/or password! Please try again."
 msgstr "用户名或密码错误，请重试。"
 
@@ -326,7 +326,7 @@ msgid "Light"
 msgstr "浅色"
 
 #: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:30
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:66
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:67
 msgid "Log in"
 msgstr "登录"
 
@@ -335,7 +335,7 @@ msgid "Log in again to save Appearance for every browser."
 msgstr "重新登录后即可为所有浏览器保存外观设置。"
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1365
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:139
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:143
 msgid "Log out"
 msgstr "退出登录"
 
@@ -348,7 +348,7 @@ msgstr "登录背景"
 msgid "Logo only"
 msgstr "仅标志"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:100
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:104
 msgctxt "vantage-theme"
 msgid "Main navigation"
 msgstr "主导航"
@@ -438,7 +438,7 @@ msgctxt "vantage-theme"
 msgid "Packet path"
 msgstr "数据包路径"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:145
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:149
 msgid "Page tabs"
 msgstr "页面标签页"
 
@@ -452,7 +452,7 @@ msgctxt "vantage-theme"
 msgid "Passes unmatched"
 msgstr "放行未匹配流量"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:63
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:64
 msgid "Password"
 msgstr "密码"
 
@@ -506,8 +506,8 @@ msgid "Saved in this browser only."
 msgstr "仅保存在此浏览器中。"
 
 #: luci-theme-vantage/htdocs/luci-static/resources/menu-vantage.js:1386
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:127
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:129
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:131
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:133
 msgid "Search pages"
 msgstr "搜索页面"
 
@@ -533,7 +533,7 @@ msgstr "显示完整描述"
 msgid "Show full help: %s"
 msgstr "显示完整帮助：%s"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:97
+#: luci-theme-vantage/ucode/template/themes/vantage/header.ut:101
 msgid "Skip to content"
 msgstr "跳至正文"
 
@@ -600,7 +600,7 @@ msgstr "使用浅色主题"
 msgid "Used"
 msgstr "已用"
 
-#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:59
+#: luci-theme-vantage/ucode/template/themes/vantage/sysauth.ut:60
 msgid "Username"
 msgstr "用户名"
 
