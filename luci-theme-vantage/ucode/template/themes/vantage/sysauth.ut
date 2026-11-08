@@ -40,6 +40,7 @@
 })(document.documentElement);
 </script>
 <link rel="stylesheet" href="{{ media }}/vantage.css">
+<link rel="stylesheet" href="{{ media }}/qwrt.css">
 <link rel="icon" href="{{ media }}/logo.svg" type="image/svg+xml">
 </head>
 <body class="vt-login-page" data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
