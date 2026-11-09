@@ -148,4 +148,5 @@
 		</header>
 		<nav class="vt-tabs" id="vt-tabs" aria-label="{{ entityencode(_('Page tabs'), true) }}" hidden></nav>
 		<main id="maincontent" class="vt-main">
+			<div id="tabmenu"></div>
 {% endif %}
