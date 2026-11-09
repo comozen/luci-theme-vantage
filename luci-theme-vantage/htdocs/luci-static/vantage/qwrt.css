@@ -514,3 +514,10 @@ body .cbi-value-description small {
 body :is(code, kbd, .v-nft-link, .v-nft-endpoint, .v-nft-rule) {
 	font-size: 12px !important;
 }
+
+/* Status -> LXC (lxccm) mounts its whole page into #tabmenu, a container
+   the Bootstrap and Design headers carry; without it the view throws on
+   a null append. Keep it out of the way until it has content, and drop
+   the view spinner it leaves behind. */
+#tabmenu:empty { display: none; }
+#tabmenu:not(:empty) ~ #view { display: none; }
