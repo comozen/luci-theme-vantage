@@ -117,6 +117,11 @@ const RE_MILLIDEG = /^-?[0-9]{1,7}$/;
 const RE_ZONE_TYPE = /^[A-Za-z0-9_.-]{1,40}$/;
 const RE_NETDEV = /^[A-Za-z0-9_.-]{1,15}$/;
 const RE_SWITCH_PORT = /^([0-9]{1,2})([t*]?)$/;    // '5t'
+const RE_PORT_HEX = /^(0x)?[0-9a-fA-F]{1,4}$/;      // brif port_no
+const RE_SPACE_RUN = /[[:space:]]+/;
+const RE_V6_ZERO = /^0{32}$/;                       // the ::/0 destination
+const RE_SYSCTL_KEY = /^[a-z_]{1,32}$/;
+const RE_SYSCTL_VAL = /^[0-9]{1,18}$/;
 const RE_SWITCH = /^[A-Za-z0-9_.-]{1,32}$/;
 const RE_ROLE = /^[a-z0-9]{1,16}$/;
 const RE_VID = /^[0-9]{1,4}$/;
@@ -349,7 +354,7 @@ function wireless_from_config() {
 
 		/* QSDK names each VAP netdev after its section and leaves ifname
 		   out of the config; only a name the kernel really has counts */
-		if (type(ifname) != 'string' && match(s['.name'], /^[A-Za-z0-9_.-]{1,64}$/) &&
+		if (type(ifname) != 'string' && match(s['.name'], RE_NAME) &&
 		    (s['.name'] in (lsdir(NET) ?? [])))
 			ifname = s['.name'];
 
@@ -628,7 +633,7 @@ function bridge_ports(br) {
 
 		let no = trim(readfile(NET + '/' + br + '/brif/' + p + '/port_no', 16) ?? '');
 
-		if (match(no, /^(0x)?[0-9a-fA-F]{1,4}$/))
+		if (match(no, RE_PORT_HEX))
 			ports[hex(no)] = p;
 	}
 
@@ -711,7 +716,7 @@ function routes_v4() {
 	let out = [];
 
 	for (let line in split(raw, '\n')) {
-		let f = split(trim(line), /[[:space:]]+/);
+		let f = split(trim(line), RE_SPACE_RUN);
 
 		if (length(f) < 8 || f[0] == 'Iface' || f[1] != '00000000' || f[7] != '00000000')
 			continue;
@@ -734,9 +739,9 @@ function routes_v6() {
 	let out = [];
 
 	for (let line in split(raw, '\n')) {
-		let f = split(trim(line), /[[:space:]]+/);
+		let f = split(trim(line), RE_SPACE_RUN);
 
-		if (length(f) < 10 || !match(f[0], /^0{32}$/) || f[1] != '00' || (hex(f[8]) & 0x1) == 0)
+		if (length(f) < 10 || !match(f[0], RE_V6_ZERO) || f[1] != '00' || (hex(f[8]) & 0x1) == 0)
 			continue;
 
 		push(out, { dev: netdev(f[9]), metric: hex(f[5]) });
@@ -972,7 +977,7 @@ const methods = {
 		call: function(request) {
 			let dev = request.args.device, out = [];
 
-			if (type(dev) != 'string' || !match(dev, /^[A-Za-z0-9_.-]{1,15}$/) ||
+			if (type(dev) != 'string' || !match(dev, RE_NETDEV) ||
 			    !(dev in (lsdir(NET) ?? [])))
 				return { results: out };
 
@@ -993,13 +998,13 @@ const methods = {
 				if (!f)
 					continue;
 
-				let toks = split(f.read('all') ?? '', /[[:space:]]+/);
+				let toks = split(f.read('all') ?? '', RE_SPACE_RUN);
 				let v = {};
 
 				f.close();
 
 				for (let i = 0; i + 1 < length(toks); i++) {
-					if (match(toks[i], /^[a-z_]{1,32}$/) && match(toks[i + 1], /^[0-9]{1,18}$/)) {
+					if (match(toks[i], RE_SYSCTL_KEY) && match(toks[i + 1], RE_SYSCTL_VAL)) {
 						v[toks[i]] = int(toks[i + 1]);
 						i++;
 					}
