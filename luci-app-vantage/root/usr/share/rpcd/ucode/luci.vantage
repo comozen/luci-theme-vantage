@@ -782,10 +782,6 @@ function survey(dev) {
 
 	return out;
 }
-	}
-
-	return out;
-}
 
 function routes() {
 	let v4 = routes_v4(), v6 = routes_v6();
