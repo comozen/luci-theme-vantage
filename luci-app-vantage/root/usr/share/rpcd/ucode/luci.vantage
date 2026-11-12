@@ -330,6 +330,15 @@ function reduce_radio(r) {
 // wins. Run state stays unknown here: iwinfo is served by rpcd itself, so
 // asking it from a plugin would wait on rpcd. No txpower either: vendor
 // drivers do not configure it in dBm (mtkwifi: per cent).
+/* QSDK names each VAP netdev after its section and leaves ifname out of
+   the config; only a name the kernel really has counts */
+function qwrt_ifname(s) {
+	if (type(s.ifname) == 'string')
+		return s.ifname;
+
+	return (match(s['.name'], RE_NAME) && (s['.name'] in (lsdir(NET) ?? []))) ? s['.name'] : null;
+}
+
 function wireless_from_config() {
 	let wl = cursor();
 	let radios = {}, taken = {}, out = {};
@@ -344,13 +353,7 @@ function wireless_from_config() {
 
 	wl.foreach(WIRELESS, 'wifi-iface', (s) => {
 		let r = (type(s.device) == 'string') ? radios[s.device] : null;
-		let ifname = s.ifname;
-
-		/* QSDK names each VAP netdev after its section and leaves ifname
-		   out of the config; only a name the kernel really has counts */
-		if (type(ifname) != 'string' && match(s['.name'], RE_NAME) &&
-		    (s['.name'] in (lsdir(NET) ?? [])))
-			ifname = s['.name'];
+		let ifname = qwrt_ifname(s);
 
 		if (type(r) != 'object' || uci_true(s.disabled) || type(ifname) != 'string' ||
 		    !match(ifname, RE_NAME) || taken[ifname])
@@ -542,12 +545,14 @@ function netdev(v) {
 	return type(v) == 'string' && match(v, RE_NETDEV) ? v : null;
 }
 
-// The last netlink dump: { at, sig, hosts } (at: monotonic seconds; sig:
-// the brforward identity it was taken with), and the byte order of
-// brforward's ageing field (the host's: true little-endian), learned
-// from the first dump that pairs a record with a time since heard.
-// rpcd keeps this module, these with it, between calls.
-let fdb_le = null;
+/* ------------------------------------------------------------------------
+   QWRT: the five deviations from upstream, in one place.
+   The functions above keep upstream's names and signatures and delegate
+   here, so a rebase only has to keep the one-line delegates. QSDK ships
+   no ucode-mod-rtnl (bridges and routes), no NL80211 survey (the driver),
+   netifd does not manage its radios (ifname) and iwinfo reports zero
+   counters (80211stats).
+   ------------------------------------------------------------------------ */
 
 // The bridges' sysfs brforward tables: FDB_ENTRY-byte records (MAC, port
 // number, is_local, ageing in 1/100 s, the port number's high byte),
@@ -562,7 +567,7 @@ let fdb_le = null;
 // Over FDB_PARSE records between them, { sig: null }: the records are
 // only counted, as before, and the caller dumps (a host making up
 // addresses near FDB_LIMIT must not make every call parse them all)
-function bridge_table() {
+function qwrt_bridge_table() {
 	let left = FDB_LIMIT * FDB_ENTRY;
 	let sig = '', ages = {}, ports = {}, multi = false, tables = [];
 
@@ -618,7 +623,7 @@ function bridge_table() {
 // brforward and the port map rather than a netlink dump: QSDK firmware
 // ships no ucode-mod-rtnl, and ucode resolves imports when the module is
 // compiled, so importing it would keep the whole plugin from loading there.
-function bridge_ports(br) {
+function qwrt_bridge_ports(br) {
 	let ports = {};
 
 	for (let p in (lsdir(NET + '/' + br + '/brif') ?? [])) {
@@ -634,8 +639,8 @@ function bridge_ports(br) {
 	return ports;
 }
 
-function wired() {
-	let tb = bridge_table();
+function qwrt_wired() {
+	let tb = qwrt_bridge_table();
 
 	if (tb == null)
 		return null;
@@ -646,7 +651,7 @@ function wired() {
 		if (!netdev(br) || lsdir(NET + '/' + br + '/brif') == null)
 			continue;
 
-		let ports = bridge_ports(br);
+		let ports = qwrt_bridge_ports(br);
 		let raw = readfile(NET + '/' + br + '/brforward', left);
 
 		if (type(raw) != 'string' || length(raw) < FDB_ENTRY)
@@ -691,7 +696,7 @@ function wired() {
 // /proc, since QSDK firmware ships no ucode-mod-rtnl. A family without a
 // default route is left out; null when the tables cannot be read. No
 // gateways, and no single dev on a multipath route.
-function best_route(list) {
+function qwrt_best_route(list) {
 	let best = null;
 
 	for (let r in list)
@@ -701,7 +706,7 @@ function best_route(list) {
 	return best;
 }
 
-function routes_v4() {
+function qwrt_routes_v4() {
 	let raw = readfile(PROC_ROUTE, 65536);
 
 	if (type(raw) != 'string')
@@ -724,7 +729,7 @@ function routes_v4() {
 	return out;
 }
 
-function routes_v6() {
+function qwrt_routes_v6() {
 	let raw = readfile(PROC_ROUTE6, 65536);
 
 	if (type(raw) != 'string')
@@ -749,23 +754,76 @@ function routes_v6() {
 // QSDK's qca-wifi has no NL80211 channel survey and its iwinfo backend
 // killed rpcd when asked (#124): answer empty, and the view keeps whatever
 // iwinfo info carries. Standard OpenWrt reads it through nl80211 upstream.
-function survey(dev) {
-	return [];
-}
-
-function routes() {
-	let v4 = routes_v4(), v6 = routes_v6();
+function qwrt_routes() {
+	let v4 = qwrt_routes_v4(), v6 = qwrt_routes_v6();
 
 	if (v4 == null || v6 == null)
 		return null;
 
 	let out = [];
 
-	for (let q in [ { family: 4, best: best_route(v4) }, { family: 6, best: best_route(v6) } ])
+	for (let q in [ { family: 4, best: qwrt_best_route(v4) }, { family: 6, best: qwrt_best_route(v6) } ])
 		if (q.best)
 			push(out, { family: q.family, dev: q.best.dev, metric: q.best.metric });
 
 	return out;
+}
+
+/* the counters method's body: one fixed 80211stats call a MAC */
+function qwrt_counters(dev, macs) {
+	let out = [];
+
+	if (type(dev) != 'string' || !match(dev, RE_NETDEV) || !(dev in (lsdir(NET) ?? [])))
+		return { results: out };
+
+	macs = (type(macs) == 'array') ? macs : [];
+
+	let seen = 0;
+
+	for (let m in macs) {
+		if (seen++ >= 64)
+			break;
+
+		let mac = norm_mac(m);
+
+		if (!mac)
+			continue;
+
+		let f = popen('/usr/bin/timeout 2 /usr/sbin/80211stats -i ' + dev + ' ' + mac, 'r');
+
+		if (!f)
+			continue;
+
+		let toks = split(f.read('all') ?? '', RE_SPACE_RUN);
+		let v = {};
+
+		f.close();
+
+		for (let i = 0; i + 1 < length(toks); i++) {
+			if (match(toks[i], RE_SYSCTL_KEY) && match(toks[i + 1], RE_SYSCTL_VAL)) {
+				v[toks[i]] = int(toks[i + 1]);
+				i++;
+			}
+		}
+
+		push(out, { mac, rxBytes: v.rx_bytes ?? null, txBytes: v.tx_bytes ?? null,
+			rxPackets: v.rx_data ?? null, txPackets: v.tx_data ?? null });
+	}
+
+	return { results: out };
+}
+
+
+function wired() {
+	return qwrt_wired();
+}
+
+function survey(dev) {
+	return [];
+}
+
+function routes() {
+	return qwrt_routes();
 }
 
 function switch_port(v) {
@@ -933,58 +991,11 @@ const methods = {
 		}
 	},
 
-	// Per-station byte and packet counters from the vendor tool: QSDK's
-	// iwinfo assoclist reports zeros for them, and 80211stats is the only
-	// source left. One fixed command; device and MACs are validated, so no
-	// argument can add anything to it.
+	/* QSDK's iwinfo reports zero counters: the vendor tool has them */
 	counters: {
 		args: { device: '', macs: [] },
 		call: function(request) {
-			let dev = request.args.device, out = [];
-
-			if (type(dev) != 'string' || !match(dev, RE_NETDEV) ||
-			    !(dev in (lsdir(NET) ?? [])))
-				return { results: out };
-
-			let macs = (type(request.args.macs) == 'array') ? request.args.macs : [];
-			let seen = 0;
-
-			for (let m in macs) {
-				if (seen++ >= 64)
-					break;
-
-				let mac = norm_mac(m);
-
-				if (!mac)
-					continue;
-
-				let f = popen('/usr/bin/timeout 2 /usr/sbin/80211stats -i ' + dev + ' ' + mac, 'r');
-
-				if (!f)
-					continue;
-
-				let toks = split(f.read('all') ?? '', RE_SPACE_RUN);
-				let v = {};
-
-				f.close();
-
-				for (let i = 0; i + 1 < length(toks); i++) {
-					if (match(toks[i], RE_SYSCTL_KEY) && match(toks[i + 1], RE_SYSCTL_VAL)) {
-						v[toks[i]] = int(toks[i + 1]);
-						i++;
-					}
-				}
-
-				push(out, {
-					mac,
-					rxBytes: v.rx_bytes ?? null,
-					txBytes: v.tx_bytes ?? null,
-					rxPackets: v.rx_data ?? null,
-					txPackets: v.tx_data ?? null
-				});
-			}
-
-			return { results: out };
+			return qwrt_counters(request.args.device, request.args.macs);
 		}
 	},
 
