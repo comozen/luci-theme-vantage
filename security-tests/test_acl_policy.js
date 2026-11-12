@@ -267,15 +267,14 @@ function checkPluginSource(src) {
 	assert.deepEqual([ ...src.matchAll(/^.*\bimport\b.*$/gm) ].map(m => m[0]), [
 		'import { cursor } from \'uci\';',
 		'import { connect } from \'ubus\';',
-		'import { access, lsdir, popen, readfile } from \'fs\';',
-		'import * as nl80211 from \'nl80211\';'
+		'import { lsdir, popen, readfile } from \'fs\';'
 	]);
 	const word = /\b(system|exec|require|loadfile|loadstring|include|render|writefile|unlink|global)\b/.exec(src);
 	assert.equal(word, null, word && `"${word[1]}" is banned in the plugin, as a word${REWORD}`);
 	/* one process, one fixed command: the vendor tool that has the counters
 	   iwinfo does not report, with the device and MACs validated above */
 	const POPEN = 'let f = popen(\'/usr/bin/timeout 2 /usr/sbin/80211stats -i \' + dev + \' \' + mac, \'r\');';
-	assert.deepEqual([ ...src.matchAll(/^.*\bpopen\b.*$/gm) ].map(m => m[0].trim()), [ "import { access, lsdir, popen, readfile } from 'fs';", POPEN ],
+	assert.deepEqual([ ...src.matchAll(/^.*\bpopen\b.*$/gm) ].map(m => m[0].trim()), [ "import { lsdir, popen, readfile } from 'fs';", POPEN ],
 		`"popen" may appear only as the one 80211stats call${REWORD}`);
 	assert.doesNotMatch(src, /(^|[^.\w])call\s*\(/m, 'the call() builtin is banned in the plugin');
 	/* fs: only the thermal zones under /sys/class/thermal, the
@@ -285,8 +284,8 @@ function checkPluginSource(src) {
 	assert.match(src, /^const THERMAL = '\/sys\/class\/thermal';$/m);
 	assert.match(src, /^const NET = '\/sys\/class\/net';$/m);
 	assert.match(src, /^const BOARD = '\/etc\/board\.json';$/m);
-	const fsCalls = [ ...src.matchAll(/\b(lsdir|readfile|access)\(([^,)]*)/g) ].map(m => m[1] + '(' + m[2]);
-	assert.ok(fsCalls.length >= 6, 'found the fs calls');
+	const fsCalls = [ ...src.matchAll(/\b(lsdir|readfile)\(([^,)]*)/g) ].map(m => m[1] + '(' + m[2]);
+	assert.ok(fsCalls.length >= 5, 'found the fs calls');
 	const ALLOWED_READS = [
 		/^lsdir\(THERMAL$/,
 		/^readfile\(THERMAL \+ '\/' \+ n \+ '\/(temp|type)'$/,
@@ -297,14 +296,12 @@ function checkPluginSource(src) {
 		/^readfile\(NET \+ '\/' \+ br \+ '\/brif\/' \+ p \+ '\/port_no'$/,
 		/^readfile\(PROC_ROUTE$/,
 		/^readfile\(PROC_ROUTE6$/,
-		/^access\(NET \+ '\/' \+ dev \+ '\/phy80211'$/,
 		/^readfile\(BOARD$/
 	];
 	for (const c of fsCalls) assert.ok(ALLOWED_READS.some(re => re.test(c)), c);
-	assert.equal([ ...src.matchAll(/\baccess\b/g) ].length, 2, `"access" may appear only on its import and the phy80211 check${REWORD}`);
 	/* each path constant only in its definition and those calls, so no
 	   `let BOARD = ...` can shadow one; board.json read up to BOARD_MAX */
-	for (const [ name, uses ] of [ [ 'THERMAL', 4 ], [ 'NET', 11 ], [ 'BOARD', 2 ] ])
+	for (const [ name, uses ] of [ [ 'THERMAL', 4 ], [ 'NET', 10 ], [ 'BOARD', 2 ] ])
 		assert.equal([ ...src.matchAll(new RegExp('\\b' + name + '\\b', 'g')) ].length, uses, `${name}: its definition and its ${uses - 1} fs calls${REWORD}`);
 	assert.match(src, /^const BOARD_MAX = 65536; /m);
 	assert.match(src, /\breadfile\(BOARD, BOARD_MAX\)/, 'board.json read with its bound');
@@ -341,13 +338,6 @@ function checkPluginSource(src) {
 	assert.deepEqual([ ...src.matchAll(/^.*\bconnect\b.*$/gm) ].map(m => m[0].trim()), [ 'import { connect } from \'ubus\';', 'let reply = connect()?.call(\'network.wireless\', \'status\');' ],
 		`"connect" may appear only on its import and the network.wireless status call${REWORD}`);
 	assert.equal([ ...src.matchAll(/\.\s*call\b/g) ].length, 1, 'one .call');
-
-	/* nl80211: one request, the read-only channel survey dump (a GET
-	   with NLM_F_DUMP, never a SET, NEW, DEL or TRIGGER) of the one
-	   interface asked about, and nothing else */
-	const survey = 'let res = nl80211.request(nl80211.const.NL80211_CMD_GET_SURVEY, nl80211.const.NLM_F_DUMP, { dev });';
-	assert.deepEqual([ ...src.matchAll(/^.*\bnl80211\b.*$/gm) ].map(m => m[0].trim()), [ 'import * as nl80211 from \'nl80211\';', survey ],
-		`"nl80211" may appear only on its import and the survey dump${REWORD}`);
 }
 
 test('the plugin source rules catch writes, other configs and calls, and names passed on', () => {
@@ -358,7 +348,7 @@ test('the plugin source rules catch writes, other configs and calls, and names p
 		'renamed import': add('let w = rw(); w.set(\'wireless\', \'x\', \'encryption\', \'none\'); w.commit(\'wireless\');')
 			.replace('import { cursor } from \'uci\';', 'import { cursor, cursor as rw } from \'uci\';'),
 		'second import': plugin.replace('import { connect } from \'ubus\';', 'import { connect } from \'ubus\';\nimport * as u from \'uci\';'),
-		'fs write': plugin.replace('import { access, lsdir, popen, readfile } from \'fs\';', 'import { access, lsdir, popen, readfile, writefile } from \'fs\';'),
+		'fs write': plugin.replace('import { lsdir, popen, readfile } from \'fs\';', 'import { lsdir, popen, readfile, writefile } from \'fs\';'),
 		'cursor by reference': add('let mk = cursor; mk().commit(WIRELESS);'),
 		'cursor on a directory': plugin.replace('let uci = cursor();', 'let uci = cursor(\'/etc/init.d\');'),
 		'third cursor': add('let w = cursor(); w.load(\'network\');'),
@@ -380,12 +370,6 @@ test('the plugin source rules catch writes, other configs and calls, and names p
 		'process by reference': add('let s = system; s(\'reboot\');'),
 		'builtin call()': add('call(print, null, null, \'x\');'),
 		'builtin by name': add('global[\'sys\' + \'tem\'](\'reboot\');'),
-		'nl80211 write': plugin.replace('nl80211.const.NL80211_CMD_GET_SURVEY, nl80211.const.NLM_F_DUMP', 'nl80211.const.NL80211_CMD_SET_INTERFACE, 0'),
-		'second nl80211 request': add('nl80211.request(nl80211.const.NL80211_CMD_TRIGGER_SCAN, 0, { dev: \'phy0-ap0\' });'),
-		'survey of another interface': plugin.replace('nl80211.const.NLM_F_DUMP, { dev });', 'nl80211.const.NLM_F_DUMP, { dev: \'phy0-ap0\' });'),
-		'nl80211 by reference': add('let n = nl80211;'),
-		'access elsewhere': add('let seen = access(\'/etc/shadow\');'),
-		'access by reference': add('let a = access;'),
 		'other bridge file': plugin.replace("readfile(NET + '/' + br + '/brforward', left)", "readfile('/etc/shadow', left)"),
 		'second process': add("let g = popen('/bin/sh', 'r');"),
 		'other command': plugin.replace("/usr/sbin/80211stats -i ", "/bin/sh -c "),

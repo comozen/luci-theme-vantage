@@ -11,7 +11,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-vantage
 PKG_VERSION:=1.0.20
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 PKG_LICENSE:=GPL-3.0-or-later
 
 LUCI_TITLE:=Vantage dashboard
@@ -24,15 +24,13 @@ LUCI_DESCRIPTION:=Live network dashboard (landing page under admin/dashboard): d
 # rpcd-mod-ucode runs the app's plugin (/usr/share/rpcd/ucode/luci.vantage:
 # key-free wireless status, thermal zones, validated alias writes), which
 # imports the uci, ubus and fs ucode modules; luci-base pulls all four in
-# already, they are listed because the plugin needs them. It also imports
-# rtnl (the bridges' hosts, the default routes) and nl80211: it reads the
-# radios' channel survey (the noise floor) through nl80211 itself, because
-# rpcd's iwinfo survey crashes rpcd on drivers other than nl80211's (#124).
-# Wi-Fi images already have both, as wifi-scripts needs them.
+# already, they are listed because the plugin needs them. It does not
+# import rtnl or nl80211: QWRT ships no ucode-mod-rtnl, and its qca-wifi
+# has no NL80211 channel survey (upstream reads that through nl80211).
 # Optional at runtime, degrade when absent: rpcd-mod-rrdns (reverse DNS
 # names), umdns (mDNS names), hostapd ubus objects (WPS names, client
 # capabilities).
-LUCI_DEPENDS:=+luci-base +rpcd +rpcd-mod-iwinfo +rpcd-mod-ucode +ucode-mod-uci +ucode-mod-ubus +ucode-mod-fs +ucode-mod-nl80211
+LUCI_DEPENDS:=+luci-base +rpcd +rpcd-mod-iwinfo +rpcd-mod-ucode +ucode-mod-uci +ucode-mod-ubus +ucode-mod-fs
 LUCI_PKGARCH:=all
 LUCI_MAINTAINER:=anothaDev <10740588+anothaDev@users.noreply.github.com>
 LUCI_URL:=https://github.com/anothaDev/luci-theme-vantage

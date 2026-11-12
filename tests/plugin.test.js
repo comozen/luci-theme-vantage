@@ -851,7 +851,7 @@ test('ucode plugin: thermal reads the same file system alike', { skip: NO_UCODE 
 
 test('ucode plugin: same results as the stand-in for every case', { skip: NO_UCODE }, () => {
 	/* wired reads the bridges and routes reads /proc: each has its own test */
-	const cases = ALL.filter(c => c.method !== 'wired' && c.method !== 'routes');
+	const cases = ALL.filter(c => c.method !== 'wired' && c.method !== 'routes' && c.method !== 'survey');
 	const u = runUcode(cases), s = runShim(cases);
 	assert.equal(u.length, cases.length);
 	for (let i = 0; i < cases.length; i++)
@@ -911,8 +911,6 @@ test('ucode plugin: the test doubles stop a copy that writes wireless, reads ano
 		'read network': "wl.load('network');",
 		'cursor on another directory': "cursor('/etc/init.d');",
 		'another ubus call': "connect().call('file', 'read', { path: '/etc/shadow' });",
-		'a survey where none was asked for': "nl80211.request(nl80211.const.NL80211_CMD_GET_SURVEY, nl80211.const.NLM_F_DUMP, { dev: 'phy2g-ap0' });",
-		'another nl80211 request': 'nl80211.request(nl80211.const.NL80211_CMD_SET_INTERFACE, 0, { dev: \'phy2g-ap0\', iftype: 2 });'
 	};
 	const run = [ BEHAVIOUR[24], BEHAVIOUR[0] ];      /* the config fallback and an alias write */
 	const ok = spawnUcode(run, src);
